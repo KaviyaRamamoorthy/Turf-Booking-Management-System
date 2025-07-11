@@ -278,6 +278,49 @@ export interface ProfileForm {
   preferences: UserPreferences;
 }
 
+// Turf Management Types
+export interface TurfFormData {
+  name: string;
+  description: string;
+  category: TurfCategory;
+  location: {
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    zipCode?: string;
+  };
+  pricing: {
+    hourlyRate: number;
+    currency: string;
+  };
+  startTime: string;
+  endTime: string;
+  slotInterval: number;
+}
+
+export interface CreateTurfRequest {
+  name: string;
+  description: string;
+  sportType: TurfCategory;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode?: string;
+  latitude?: number;
+  longitude?: number;
+  startTime: string;
+  endTime: string;
+  slotInterval: number;
+  pricePerSlot: number;
+}
+
+export interface UpdateTurfRequest extends Partial<CreateTurfRequest> {
+  id: string;
+}
+
 // Navigation Types
 export interface MenuItem {
   id: string;

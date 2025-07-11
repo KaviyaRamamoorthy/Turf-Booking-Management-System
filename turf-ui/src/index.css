@@ -69,3 +69,20 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.submit-button {
+  background-color: #008800;
+  text-align: center;
+  color: #fff;
+}
+
+.cancel-button {
+  background-color: #002200;
+  text-align: center;
+  color: #fff;
+}
+
+.close-button {
+  background-color: #fff;
+  color: #000;
+}

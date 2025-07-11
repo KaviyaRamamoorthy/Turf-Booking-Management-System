@@ -24,6 +24,7 @@ import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import CustomerDashboard from "./pages/dashboard/CustomerDashboard";
 import ProfilePage from "./pages/profile/ProfilePage";
 import HomePage from "./pages/HomePage";
+import TurfManagementContainer from "./components/admin/TurfManagementContainer";
 
 // Placeholder pages (to be created later)
 const TurfsPage = () => (
@@ -124,6 +125,16 @@ const App: React.FC = () => {
             />
 
             <Route
+              path="/admin/turfs"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AppLayout>
+                    <TurfManagementContainer />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+               <Route
               path="/admin/*"
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>

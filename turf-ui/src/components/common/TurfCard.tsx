@@ -31,7 +31,7 @@ const TurfCard: React.FC<TurfCardProps> = ({
       case "volleyball":
         return "secondary";
       default:
-        return "primary";
+        return "contrast";
     }
   };
 

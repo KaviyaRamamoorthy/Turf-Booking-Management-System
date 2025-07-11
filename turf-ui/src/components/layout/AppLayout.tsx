@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../types';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import ToastContainer from '../common/ToastContainer';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -26,6 +27,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           {children}
         </main>
       </div>
+      
+      {/* Toast Container */}
+      <ToastContainer />
     </div>
   );
 };

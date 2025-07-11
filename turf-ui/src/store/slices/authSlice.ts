@@ -69,7 +69,7 @@ export const loginUser = createAsyncThunk(
         email: credentials.email,
         name: credentials.email.split("@")[0], // Use email prefix as name
         phone: "+1234567890",
-        role: "customer", // Default to admin role
+        role: "admin", // Default to admin role
         preferences: {
           theme: "light",
           language: "en",

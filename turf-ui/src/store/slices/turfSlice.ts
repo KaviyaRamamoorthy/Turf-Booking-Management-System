@@ -467,6 +467,89 @@ export const fetchTurfById = createAsyncThunk(
   }
 );
 
+// Create new turf
+export const createTurf = createAsyncThunk(
+  "turf/createTurf",
+  async (turfData: any, { rejectWithValue }) => {
+    try {
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      // Create new turf with generated ID
+      const newTurf = {
+        id: Date.now().toString(),
+        ...turfData,
+        rating: 0,
+        reviewCount: 0,
+        vendorId: "1", // Mock vendor ID
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        images: ["https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=New+Turf"],
+        amenities: [],
+        availability: []
+      };
+      
+      return newTurf;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to create turf"
+      );
+    }
+  }
+);
+
+// Update existing turf
+export const updateTurf = createAsyncThunk(
+  "turf/updateTurf",
+  async ({ id, turfData }: { id: string; turfData: any }, { rejectWithValue }) => {
+    try {
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      // Find existing turf and update it
+      const existingTurf = mockTurfs.find((t) => t.id === id);
+      if (!existingTurf) {
+        throw new Error("Turf not found");
+      }
+      
+      const updatedTurf = {
+        ...existingTurf,
+        ...turfData,
+        updatedAt: new Date()
+      };
+      
+      return updatedTurf;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to update turf"
+      );
+    }
+  }
+);
+
+// Delete turf
+export const deleteTurf = createAsyncThunk(
+  "turf/deleteTurf",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      
+      // Check if turf exists
+      const existingTurf = mockTurfs.find((t) => t.id === id);
+      if (!existingTurf) {
+        throw new Error("Turf not found");
+      }
+      
+      return id;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to delete turf"
+      );
+    }
+  }
+);
+
 const initialState: TurfState = {
   turfs: [],
   selectedTurf: null,
@@ -520,6 +603,54 @@ const turfSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchTurfById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Create turf
+      .addCase(createTurf.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(createTurf.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.turfs.push(action.payload);
+        state.error = null;
+      })
+      .addCase(createTurf.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Update turf
+      .addCase(updateTurf.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateTurf.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const index = state.turfs.findIndex(t => t.id === action.payload.id);
+        if (index !== -1) {
+          state.turfs[index] = action.payload;
+        }
+        state.error = null;
+      })
+      .addCase(updateTurf.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Delete turf
+      .addCase(deleteTurf.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteTurf.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.turfs = state.turfs.filter(t => t.id !== action.payload);
+        state.error = null;
+      })
+      .addCase(deleteTurf.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

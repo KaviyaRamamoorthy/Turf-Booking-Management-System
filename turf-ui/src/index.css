@@ -86,3 +86,56 @@ button:focus-visible {
   background-color: #fff;
   color: #000;
 }
+
+/* PrimeReact Password component full width fix */
+.p-password {
+  width: 100% !important;
+  display: block !important;
+}
+
+.p-password .p-password-input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.p-password .p-password-panel {
+  width: 100% !important;
+}
+
+/* More specific selectors for PrimeReact Password */
+div[class*="p-password"] {
+  width: 100% !important;
+}
+
+div[class*="p-password"] input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Force the container to take full width */
+.relative.w-full .p-password {
+  width: 100% !important;
+  display: block !important;
+}
+
+/* Custom class for full width password */
+.full-width-password {
+  width: 100% !important;
+  display: block !important;
+}
+
+.full-width-password .p-password-input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.full-width-password .p-inputtext {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.p-icon-field > .p-input-icon {
+  position: absolute;
+  right: 10px;
+  top: 40%;
+}

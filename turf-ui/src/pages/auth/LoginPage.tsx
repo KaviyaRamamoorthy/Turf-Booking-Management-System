@@ -100,20 +100,17 @@ const LoginPage = () => {
                 Email Address
               </label>
               <div className="relative">
-                <span className="p-input-icon-right w-full">
-                  <InputText
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    className={`w-full ${
-                      validationErrors.email ? "p-invalid" : ""
+                <InputText
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  className={`w-full ${validationErrors.email ? "p-invalid" : ""
                     }`}
-                    placeholder="Enter your email"
-                    autoComplete="email"
-                  />
-                  <i className="pi pi-envelope" />
-                </span>
+                  placeholder="Enter your email"
+                  autoComplete="email"
+                />
+                <i className="absolute right-2 top-1/2 -translate-y-1/2  pi pi-envelope" />
                 {validationErrors.email && (
                   <small className="p-error block mt-1">
                     {validationErrors.email}
@@ -131,21 +128,22 @@ const LoginPage = () => {
                 Password
               </label>
               <div className="relative w-full">
-                <Password
-                  id="password"
-                  value={formData.password}
-                  onChange={(e) =>
-                    handleInputChange("password", e.target.value)
-                  }
-                  className={`w-full ${
-                    validationErrors.password ? "p-invalid" : ""
-                  }`}
-                  placeholder="Enter your password"
-                  autoComplete="current-password"
-                  toggleMask
-                  feedback={false}
-                  style={{ width: "100%" }}
-                />
+                <div className="w-full" style={{ width: '100%' }}>
+                  <Password
+                    id="password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
+                    className={`!w-full full-width-password ${validationErrors.password ? "p-invalid" : ""
+                      }`}
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    toggleMask
+                    appendTo="self"
+
+                  />
+                </div>
                 {validationErrors.password && (
                   <small className="p-error block mt-1">
                     {validationErrors.password}
@@ -187,14 +185,13 @@ const LoginPage = () => {
               type="submit"
               label={isLoading ? "Signing in..." : "Sign In"}
               icon={isLoading ? "pi pi-spinner pi-spin" : "pi pi-sign-in"}
-              className="!w-full !bg-green-500 "
+              className="!w-full submit-button font-bold"
               loading={isLoading}
               disabled={isLoading}
-              style={{ color: "white", fontWeight: "bold" }}
             />
 
             {/* Demo Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-blue-50 mt-2 border border-blue-200 rounded-lg p-4">
               <div className="flex items-start">
                 <i className="pi pi-info-circle text-blue-600 mt-0.5 mr-2"></i>
                 <div className="text-sm text-blue-800">

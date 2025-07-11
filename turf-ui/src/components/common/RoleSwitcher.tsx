@@ -1,25 +1,25 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Button } from 'primereact/button';
-import type { RootState } from '../../types';
-import { loginUser } from '../../store/slices/authSlice';
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Button } from "primereact/button";
+import type { RootState } from "../../types";
+import { loginUser } from "../../store/slices/authSlice";
 
 const RoleSwitcher: React.FC = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
 
-  const switchRole = (role: 'admin' | 'customer' | 'vendor') => {
+  const switchRole = (role: "admin" | "customer" | "vendor") => {
     const credentials = {
       email: `${role}@turf.com`,
-      password: 'demo123'
+      password: "demo123",
     };
     dispatch(loginUser(credentials));
   };
 
   if (!user) return null;
 
-  return (
-    <div className="fixed top-4 right-4 z-50 bg-white p-3 rounded-lg shadow-lg border">
+  return {
+    /* <div className="fixed top-4 right-4 z-50 bg-white p-3 rounded-lg shadow-lg border">
       <div className="text-sm font-medium text-gray-700 mb-2">Demo Role Switcher</div>
       <div className="flex gap-2">
         <Button
@@ -43,9 +43,9 @@ const RoleSwitcher: React.FC = () => {
       </div>
       <div className="text-xs text-gray-500 mt-2">
         Current: {user.role}
-      </div>
-    </div>
-  );
+      </div> 
+    </div>*/
+  };
 };
 
-export default RoleSwitcher; 
+export default RoleSwitcher;

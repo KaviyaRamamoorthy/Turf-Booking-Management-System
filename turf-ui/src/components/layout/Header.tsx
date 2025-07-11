@@ -1,26 +1,29 @@
-import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Button } from 'primereact/button';
-import { Menu } from 'primereact/menu';
-import type { RootState } from '../../types';
-import { logoutUser } from '../../store/slices/authSlice';
-import { USER_MENU_ITEMS } from '../../constants/navigation';
+import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { Button } from "primereact/button";
+import { Menu } from "primereact/menu";
+import type { RootState } from "../../types";
+import type { AppDispatch } from "../../store";
+import { logoutUser } from "../../store/slices/authSlice";
+import { USER_MENU_ITEMS } from "../../constants/navigation";
 
 const Header: React.FC = () => {
   const [userMenuVisible, setUserMenuVisible] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.auth);
 
   const handleUserMenuClick = (item: any) => {
     switch (item.id) {
-      case 'logout':
+      case "logout":
         dispatch(logoutUser());
         break;
-      case 'profile':
-        // Navigate to profile page
+      case "profile":
+        navigate("/profile");
         break;
-      case 'change-password':
-        // Open change password modal
+      case "change-password":
+        navigate("/change-password");
         break;
       default:
         break;
@@ -28,7 +31,7 @@ const Header: React.FC = () => {
     setUserMenuVisible(false);
   };
 
-  const userMenuItems = USER_MENU_ITEMS.map(item => ({
+  const userMenuItems = USER_MENU_ITEMS.map((item) => ({
     ...item,
     command: () => handleUserMenuClick(item),
   }));
@@ -59,17 +62,17 @@ const Header: React.FC = () => {
               onClick={() => setUserMenuVisible(!userMenuVisible)}
               aria-label="User menu"
             />
-            
+
             {userMenuVisible && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+              <div className="absolute right-0 mt-2 w-52 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
                 {userMenuItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => handleUserMenuClick(item)}
-                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex items-center whitespace-nowrap gap-1.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    <i className={`${item.icon} mr-3`}></i>
-                    {item.label}
+                    <i className={`${item.icon}`}></i>
+                    <p>{item.label}</p>
                   </button>
                 ))}
               </div>
@@ -81,4 +84,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header; 
+export default Header;

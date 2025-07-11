@@ -1,5 +1,5 @@
 // User and Authentication Types
-export type UserRole = 'admin' | 'customer' | 'vendor';
+export type UserRole = "admin" | "customer" | "vendor";
 
 export interface User {
   id: string;
@@ -7,13 +7,18 @@ export interface User {
   name: string;
   phone: string;
   role: UserRole;
+  address?: {
+    pincode: string;
+    state: string;
+    city: string;
+  };
   preferences: UserPreferences;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface UserPreferences {
-  theme: 'light' | 'dark';
+  theme: "light" | "dark";
   language: string;
   notifications: boolean;
 }
@@ -27,7 +32,12 @@ export interface AuthState {
 }
 
 // Turf Types
-export type TurfCategory = 'football' | 'cricket' | 'tennis' | 'basketball' | 'volleyball';
+export type TurfCategory =
+  | "football"
+  | "cricket"
+  | "tennis"
+  | "basketball"
+  | "volleyball";
 
 export interface Location {
   address: string;
@@ -44,7 +54,7 @@ export interface PricingInfo {
   hourlyRate: number;
   currency: string;
   discounts?: {
-    type: 'percentage' | 'fixed';
+    type: "percentage" | "fixed";
     value: number;
     minHours?: number;
   }[];
@@ -107,14 +117,19 @@ export interface TurfFilters {
 }
 
 // Booking Types
-export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no-show';
+export type BookingStatus =
+  | "pending"
+  | "confirmed"
+  | "cancelled"
+  | "completed"
+  | "no-show";
 
 export interface PaymentInfo {
   id: string;
   amount: number;
   currency: string;
-  method: 'card' | 'cash' | 'online';
-  status: 'pending' | 'completed' | 'failed';
+  method: "card" | "cash" | "online";
+  status: "pending" | "completed" | "failed";
   transactionId?: string;
   paidAt?: Date;
 }
@@ -165,12 +180,12 @@ export interface UIState {
   loading: {
     [key: string]: boolean;
   };
-  theme: 'light' | 'dark';
+  theme: "light" | "dark";
 }
 
 export interface ToastMessage {
   id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
+  type: "success" | "error" | "warning" | "info";
   title: string;
   message: string;
   duration?: number;
@@ -255,6 +270,11 @@ export interface BookingForm {
 export interface ProfileForm {
   name: string;
   phone: string;
+  address?: {
+    pincode: string;
+    state: string;
+    city: string;
+  };
   preferences: UserPreferences;
 }
 
@@ -272,4 +292,4 @@ export interface BreadcrumbItem {
   label: string;
   path: string;
   isActive: boolean;
-} 
+}

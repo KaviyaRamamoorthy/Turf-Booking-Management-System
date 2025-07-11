@@ -1,46 +1,52 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import type { AuthState, User, LoginForm, RegisterForm, UserRole } from '../../types';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import type {
+  AuthState,
+  User,
+  LoginForm,
+  RegisterForm,
+  UserRole,
+} from "../../types";
 
 // Mock authentication service
 const mockUsers: User[] = [
   {
-    id: '1',
-    email: 'admin@turf.com',
-    name: 'Admin User',
-    phone: '+1234567890',
-    role: 'admin',
+    id: "1",
+    email: "admin@turf.com",
+    name: "Admin User",
+    phone: "+1234567890",
+    role: "admin",
     preferences: {
-      theme: 'light',
-      language: 'en',
+      theme: "light",
+      language: "en",
       notifications: true,
     },
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
-    id: '2',
-    email: 'customer@turf.com',
-    name: 'John Customer',
-    phone: '+1234567891',
-    role: 'customer',
+    id: "2",
+    email: "customer@turf.com",
+    name: "John Customer",
+    phone: "+1234567891",
+    role: "customer",
     preferences: {
-      theme: 'light',
-      language: 'en',
+      theme: "light",
+      language: "en",
       notifications: true,
     },
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
-    id: '3',
-    email: 'vendor@turf.com',
-    name: 'Sarah Vendor',
-    phone: '+1234567892',
-    role: 'vendor',
+    id: "3",
+    email: "vendor@turf.com",
+    name: "Sarah Vendor",
+    phone: "+1234567892",
+    role: "vendor",
     preferences: {
-      theme: 'light',
-      language: 'en',
+      theme: "light",
+      language: "en",
       notifications: true,
     },
     createdAt: new Date(),
@@ -50,52 +56,59 @@ const mockUsers: User[] = [
 
 // Async thunks
 export const loginUser = createAsyncThunk(
-  'auth/login',
+  "auth/login",
   async (credentials: LoginForm & { role?: UserRole }, { rejectWithValue }) => {
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // For development: any email/password combination works
       // Create a user with the provided email and default admin role
       const user: User = {
         id: Date.now().toString(),
         email: credentials.email,
-        name: credentials.email.split('@')[0], // Use email prefix as name
-        phone: '+1234567890',
-        role: credentials.role || 'admin', // Default to admin role
+        name: credentials.email.split("@")[0], // Use email prefix as name
+        phone: "+1234567890",
+        role: "customer", // Default to admin role
         preferences: {
-          theme: 'light',
-          language: 'en',
+          theme: "light",
+          language: "en",
           notifications: true,
         },
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      
+
       // Mock token generation
       const token = `mock-jwt-token-${user.id}-${Date.now()}`;
-      
+
       return { user, token };
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Login failed');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Login failed"
+      );
     }
   }
 );
 
 export const registerUser = createAsyncThunk(
-  'auth/register',
-  async (userData: RegisterForm & { address?: { pincode: string; state: string; city: string } }, { rejectWithValue }) => {
+  "auth/register",
+  async (
+    userData: RegisterForm & {
+      address?: { pincode: string; state: string; city: string };
+    },
+    { rejectWithValue }
+  ) => {
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Check if user already exists
-      const existingUser = mockUsers.find(u => u.email === userData.email);
+      const existingUser = mockUsers.find((u) => u.email === userData.email);
       if (existingUser) {
-        throw new Error('User with this email already exists');
+        throw new Error("User with this email already exists");
       }
-      
+
       // Create new user
       const newUser: User = {
         id: (mockUsers.length + 1).toString(),
@@ -103,55 +116,62 @@ export const registerUser = createAsyncThunk(
         name: userData.name,
         phone: userData.phone,
         role: userData.role,
+        address: userData.address,
         preferences: {
-          theme: 'light',
-          language: 'en',
+          theme: "light",
+          language: "en",
           notifications: true,
         },
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      
+
       // Mock token generation
       const token = `mock-jwt-token-${newUser.id}-${Date.now()}`;
-      
+
       return { user: newUser, token };
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Registration failed');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Registration failed"
+      );
     }
   }
 );
 
 export const logoutUser = createAsyncThunk(
-  'auth/logout',
+  "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       // In a real app, you would call the logout API endpoint
       return true;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Logout failed');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Logout failed"
+      );
     }
   }
 );
 
 export const getCurrentUser = createAsyncThunk(
-  'auth/getCurrentUser',
+  "auth/getCurrentUser",
   async (_, { rejectWithValue }) => {
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       // In a real app, you would validate the token and get user data
       // For now, return the first admin user as default
       const user = mockUsers[0];
       const token = `mock-jwt-token-${user.id}-${Date.now()}`;
-      
+
       return { user, token };
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to get current user');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to get current user"
+      );
     }
   }
 );
@@ -167,7 +187,7 @@ const initialState: AuthState = {
 
 // Auth slice
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -202,7 +222,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      
+
       // Register
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
@@ -219,7 +239,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      
+
       // Logout
       .addCase(logoutUser.pending, (state) => {
         state.isLoading = true;
@@ -235,7 +255,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      
+
       // Get current user
       .addCase(getCurrentUser.pending, (state) => {
         state.isLoading = true;
@@ -256,4 +276,4 @@ const authSlice = createSlice({
 });
 
 export const { clearError, updateUser, setUserRole } = authSlice.actions;
-export default authSlice.reducer; 
+export default authSlice.reducer;

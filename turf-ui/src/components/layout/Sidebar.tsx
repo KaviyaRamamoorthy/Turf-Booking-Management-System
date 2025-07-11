@@ -57,7 +57,7 @@ const Sidebar: React.FC = () => {
                 >
                   <i className={`${item.icon} ${sidebar.isCollapsed ? 'text-lg' : 'mr-3'}`}></i>
                   {!sidebar.isCollapsed && (
-                    <span className="font-medium">{item.label}</span>
+                    <span className="font-medium text-start">{item.label}</span>
                   )}
                 </button>
               </li>

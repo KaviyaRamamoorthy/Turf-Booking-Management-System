@@ -11,7 +11,10 @@ import {
   clearFilters,
 } from "../store/slices/turfSlice";
 import TurfCard from "../components/common/TurfCard";
-import type { RootState } from "../types";
+import TurfDetailsModal from "../components/common/TurfDetailsModal";
+import TurfBookingModal from "../components/common/TurfBookingModal";
+import BookingSuccessModal from "../components/common/BookingSuccessModal";
+import type { RootState, Turf } from "../types";
 import type { AppDispatch } from "../store";
 import type { TurfCategory } from "../types";
 
@@ -21,9 +24,19 @@ const HomePage: React.FC = () => {
     (state: RootState) => state.turf
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<TurfCategory | null>(
-    null
-  );
+  const [sortBy, setSortBy] = useState("featured");
+  const [selectedTurf, setSelectedTurf] = useState<Turf | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedTurfForBooking, setSelectedTurfForBooking] =
+    useState<Turf | null>(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState<{
+    date: Date;
+    timeSlot: string;
+    bookingId?: string;
+    totalAmount?: number;
+  } | null>(null);
 
   // Category options for dropdown
   const categoryOptions = [
@@ -35,43 +48,127 @@ const HomePage: React.FC = () => {
     { label: "Volleyball", value: "volleyball" },
   ];
 
+  // Sort options
+  const sortOptions = [
+    { label: "Featured", value: "featured" },
+    { label: "Price: Low to High", value: "price-low" },
+    { label: "Price: High to Low", value: "price-high" },
+    { label: "Rating", value: "rating" },
+    { label: "Newest", value: "newest" },
+  ];
+
   // Load turfs on component mount
   useEffect(() => {
     dispatch(fetchTurfs());
   }, [dispatch]);
 
-  // Filter turfs based on search query and selected category
+  // Filter and sort turfs
   const filteredTurfs = useMemo(() => {
-    return turfs.filter((turf) => {
-      const matchesSearch =
-        searchQuery === "" ||
-        turf.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        turf.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        turf.location.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        turf.location.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        turf.category.toLowerCase().includes(searchQuery.toLowerCase());
+    let result = turfs.filter((turf) => {
+      if (!searchQuery) return true;
 
-      const matchesCategory =
-        selectedCategory === null || turf.category === selectedCategory;
-
-      return matchesSearch && matchesCategory;
+      const query = searchQuery.toLowerCase();
+      return (
+        turf.name.toLowerCase().includes(query) ||
+        turf.description.toLowerCase().includes(query) ||
+        turf.category.toLowerCase().includes(query) ||
+        turf.location.city.toLowerCase().includes(query) ||
+        turf.location.state.toLowerCase().includes(query) ||
+        turf.location.address.toLowerCase().includes(query)
+      );
     });
-  }, [turfs, searchQuery, selectedCategory]);
+
+    // Sort results
+    switch (sortBy) {
+      case "price-low":
+        result.sort((a, b) => a.pricing.hourlyRate - b.pricing.hourlyRate);
+        break;
+      case "price-high":
+        result.sort((a, b) => b.pricing.hourlyRate - a.pricing.hourlyRate);
+        break;
+      case "rating":
+        result.sort((a, b) => b.rating - a.rating);
+        break;
+      case "newest":
+        result.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        break;
+      default:
+        // Featured - keep original order
+        break;
+    }
+
+    return result;
+  }, [turfs, searchQuery, sortBy]);
 
   const handleClearFilters = () => {
     setSearchQuery("");
-    setSelectedCategory(null);
+    setSortBy("featured");
     dispatch(clearFilters());
   };
 
-  const handleTurfViewDetails = (turf: any) => {
-    // TODO: Navigate to turf details page
-    console.log("View details for turf:", turf);
+  const handleTurfViewDetails = (turf: Turf) => {
+    setSelectedTurf(turf);
+    setShowDetailsModal(true);
   };
 
-  const handleTurfBook = (turf: any) => {
-    // TODO: Navigate to booking page
-    console.log("Book turf:", turf);
+  const handleCloseModal = () => {
+    setShowDetailsModal(false);
+    setSelectedTurf(null);
+  };
+
+  const handleTurfBook = (turf: Turf) => {
+    setSelectedTurfForBooking(turf);
+    setShowBookingModal(true);
+  };
+
+  const handleBookingConfirm = (
+    turf: Turf,
+    date: Date,
+    timeSlot: string,
+    bookingData?: any
+  ) => {
+    console.log("🎯 Booking confirmed - switching modals", {
+      turf: turf.name,
+      bookingData,
+      currentStates: {
+        showBookingModal,
+        showSuccessModal,
+        selectedTurfForBooking: selectedTurfForBooking?.name,
+      },
+    });
+
+    // Store booking details for success modal
+    const details = {
+      date,
+      timeSlot,
+      bookingId: bookingData?.id,
+      totalAmount: bookingData?.totalAmount,
+    };
+
+    console.log("📋 Setting booking details:", details);
+    setBookingDetails(details);
+
+    // Switch from booking modal to success modal
+    console.log("🔄 Switching modals: booking -> success");
+    setShowBookingModal(false);
+    setShowSuccessModal(true);
+    // Keep selectedTurfForBooking for the success modal
+
+    console.log("✅ Modal switch complete");
+  };
+
+  const handleBookingCancel = () => {
+    setShowBookingModal(false);
+    setSelectedTurfForBooking(null);
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    setSelectedTurfForBooking(null);
+    setBookingDetails(null);
   };
 
   if (isLoading) {
@@ -91,94 +188,107 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          Discover Sports Turfs
-        </h1>
-        <p className="text-gray-600">
-          Find and book the perfect turf for your next game
-        </p>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="flex-1 min-w-64">
-            <span className="p-input-icon-left w-full">
-              <i className="pi pi-search" />
-              <InputText
-                placeholder="Search by name, category, or location..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-              />
-            </span>
-          </div>
-
-          <div className="min-w-48">
-            <Dropdown
-              value={selectedCategory}
-              options={categoryOptions}
-              onChange={(e) => setSelectedCategory(e.value)}
-              placeholder="Select Category"
-              className="w-full"
-              showClear
+    <div className="min-h-screen bg-gray-50">
+      {/* Search Form */}
+      <div className="max-w-3xl mx-auto">
+        <div className="flex flex-col space-y-3">
+          <span className="p-input-icon-left block">
+            <i className="pi pi-search text-gray-400 !left-4" />
+            <InputText
+              placeholder="Search by name, category, location..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-12 !pl-12 !text-lg"
             />
-          </div>
-
-          <Button
-            label="Clear Filters"
-            icon="pi pi-filter-slash"
-            outlined
-            onClick={handleClearFilters}
-            disabled={!searchQuery && !selectedCategory}
-          />
-        </div>
-      </div>
-
-      {/* Results Info */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <span className="text-gray-600">
-            {filteredTurfs.length}{" "}
-            {filteredTurfs.length === 1 ? "turf" : "turfs"} found
           </span>
-          {(searchQuery || selectedCategory) && (
-            <span className="text-sm text-gray-500 ml-2">
-              {searchQuery && `matching "${searchQuery}"`}
-              {searchQuery && selectedCategory && " in "}
-              {selectedCategory && `${selectedCategory} category`}
-            </span>
-          )}
         </div>
       </div>
 
-      {/* Turfs Grid */}
-      {filteredTurfs.length === 0 ? (
-        <div className="text-center py-12">
-          <i className="pi pi-search text-6xl text-gray-300 mb-4"></i>
-          <h3 className="text-xl font-semibold text-gray-600 mb-2">
-            No turfs found
-          </h3>
-          <p className="text-gray-500">
-            Try adjusting your search criteria or clear the filters to see all
-            available turfs.
-          </p>
+      {/* Results Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Results Header */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+          <div className="flex-1">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Available Turfs ({filteredTurfs.length})
+            </h2>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-semibold text-gray-700 whitespace-nowrap">
+                Sort by:
+              </label>
+              <Dropdown
+                value={sortBy}
+                options={sortOptions}
+                onChange={(e) => setSortBy(e.value)}
+                className="w-48"
+              />
+            </div>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredTurfs.map((turf) => (
-            <TurfCard
-              key={turf.id}
-              turf={turf}
-              onViewDetails={handleTurfViewDetails}
-              onBook={handleTurfBook}
-            />
-          ))}
-        </div>
-      )}
+
+        {/* Turfs Grid */}
+        {filteredTurfs.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-100">
+            <div className="max-w-md mx-auto">
+              <i className="pi pi-search text-7xl text-gray-300 mb-6"></i>
+              <h3 className="text-2xl font-bold text-gray-700 mb-3">
+                {searchQuery ? "No turfs found" : "Start your search"}
+              </h3>
+              <p className="text-gray-500 text-lg mb-8 leading-relaxed">
+                {searchQuery
+                  ? "Try adjusting your search terms or clear the search to see all available turfs."
+                  : "Use the search box above to find turfs by name, category, or location."}
+              </p>
+              {searchQuery && (
+                <Button
+                  label="Clear Search"
+                  icon="pi pi-refresh"
+                  onClick={handleClearFilters}
+                  className="!bg-gradient-to-r !from-green-500 !to-green-600 !border-transparent hover:!from-green-600 hover:!to-green-700 !px-8 !py-3 !text-base !font-semibold"
+                />
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredTurfs.map((turf) => (
+              <TurfCard
+                key={turf.id}
+                turf={turf}
+                onViewDetails={handleTurfViewDetails}
+                onBook={handleTurfBook}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Turf Details Modal */}
+      <TurfDetailsModal
+        turf={selectedTurf}
+        visible={showDetailsModal}
+        onHide={handleCloseModal}
+        onBook={handleTurfBook}
+      />
+
+      {/* Turf Booking Modal */}
+      <TurfBookingModal
+        turf={selectedTurfForBooking}
+        visible={showBookingModal}
+        onHide={handleBookingCancel}
+        onConfirmBooking={handleBookingConfirm}
+      />
+
+      {/* Booking Success Modal */}
+      <BookingSuccessModal
+        visible={showSuccessModal}
+        onHide={handleSuccessModalClose}
+        turf={selectedTurfForBooking}
+        bookingDetails={bookingDetails}
+      />
     </div>
   );
 };

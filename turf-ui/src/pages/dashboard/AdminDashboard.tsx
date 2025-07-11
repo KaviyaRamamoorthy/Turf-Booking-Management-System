@@ -5,11 +5,12 @@ import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import type { RootState } from "../../types";
+import type { AppDispatch } from "../../store";
 import { fetchAdminStats } from "../../store/slices/adminSlice";
 import RoleSwitcher from "../../components/common/RoleSwitcher";
 
 const AdminDashboard: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { stats, isLoading } = useSelector((state: RootState) => state.admin);
   const { user } = useSelector((state: RootState) => state.auth);
 

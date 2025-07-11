@@ -6,10 +6,11 @@ import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import type { RootState } from "../../types";
+import type { AppDispatch } from "../../store";
 import { fetchBookings } from "../../store/slices/bookingSlice";
 
 const CustomerDashboard: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { bookings, isLoading } = useSelector(
     (state: RootState) => state.booking

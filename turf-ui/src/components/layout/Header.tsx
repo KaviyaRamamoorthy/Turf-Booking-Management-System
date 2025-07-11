@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
 import type { RootState } from "../../types";
@@ -12,7 +12,28 @@ const Header: React.FC = () => {
   const [userMenuVisible, setUserMenuVisible] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useSelector((state: RootState) => state.auth);
+
+  // Function to get page title based on current route
+  const getPageTitle = (pathname: string) => {
+    switch (pathname) {
+      case "/bookings":
+        return "My Bookings";
+      case "/profile":
+        return "Profile";
+      case "/turfs":
+        return "Browse Turfs";
+      case "/dashboard/admin":
+        return "Admin Dashboard";
+      case "/dashboard/customer":
+        return "Customer Dashboard";
+      case "/dashboard/vendor":
+        return "Vendor Dashboard";
+      default:
+        return "Welcome Home";
+    }
+  };
 
   const handleUserMenuClick = (item: any) => {
     switch (item.id) {
@@ -41,9 +62,9 @@ const Header: React.FC = () => {
       <div className="flex items-center justify-between">
         {/* Left side - Logo/Brand */}
         <div className="flex items-center">
-          <h1 className="text-xl font-semibold text-gray-800">
-            Turf Booking System
-          </h1>
+          <h2 className="text-4xl font-semibold text-gray-800">
+            {getPageTitle(location.pathname)}
+          </h2>
         </div>
 
         {/* Right side - User menu */}

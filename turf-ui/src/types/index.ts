@@ -129,7 +129,7 @@ export interface PaymentInfo {
   amount: number;
   currency: string;
   method: "card" | "cash" | "online";
-  status: "pending" | "completed" | "failed";
+  status: "pending" | "completed" | "failed" | "refunded";
   transactionId?: string;
   paidAt?: Date;
 }

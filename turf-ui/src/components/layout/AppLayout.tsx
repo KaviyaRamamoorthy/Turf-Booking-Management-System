@@ -16,16 +16,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
       <Sidebar />
-      
+
       {/* Main Content Area */}
-      <div className={`flex flex-col flex-1 ${sidebar.isCollapsed ? 'ml-16' : 'ml-4'}`}>
+      <div className={`flex flex-col flex-1`}>
         {/* Header */}
         <Header />
-        
+
         {/* Main Content */}
-        <main className="flex-1 overflow-auto p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>
       
       {/* Toast Container */}
@@ -34,4 +32,4 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   );
 };
 
-export default AppLayout; 
+export default AppLayout;

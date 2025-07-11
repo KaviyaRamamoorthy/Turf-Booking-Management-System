@@ -1,0 +1,77 @@
+/* Calendar styling for TurfBookingModal */
+.calendar-small .p-datepicker {
+  font-size: 0.875rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.calendar-small .p-datepicker table {
+  font-size: 0.875rem;
+}
+
+.calendar-small .p-datepicker .p-datepicker-header {
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.calendar-small .p-datepicker .p-datepicker-prev,
+.calendar-small .p-datepicker .p-datepicker-next {
+  width: 2rem !important;
+  height: 2rem !important;
+  color: #6c757d !important;
+  background: white !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.calendar-small .p-datepicker .p-datepicker-prev:hover,
+.calendar-small .p-datepicker .p-datepicker-next:hover {
+  background: #e9ecef !important;
+  color: #495057 !important;
+}
+
+.calendar-small .p-datepicker .p-datepicker-prev:focus,
+.calendar-small .p-datepicker .p-datepicker-next:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.calendar-small .p-datepicker .p-datepicker-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+.calendar-small .p-datepicker td {
+  padding: 0.25rem;
+}
+
+.calendar-small .p-datepicker td > span {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.875rem;
+}
+
+/* Ensure arrows are visible with proper icons */
+.calendar-small .p-datepicker .p-datepicker-prev::before {
+  content: "‹";
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.calendar-small .p-datepicker .p-datepicker-next::before {
+  content: "›";
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* Override any conflicting styles */
+.calendar-small .p-datepicker .p-datepicker-prev,
+.calendar-small .p-datepicker .p-datepicker-next {
+  opacity: 1 !important;
+  visibility: visible !important;
+}

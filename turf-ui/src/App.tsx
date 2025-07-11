@@ -25,6 +25,7 @@ import CustomerDashboard from "./pages/dashboard/CustomerDashboard";
 import ProfilePage from "./pages/profile/ProfilePage";
 import HomePage from "./pages/HomePage";
 import TurfManagementContainer from "./components/admin/TurfManagementContainer";
+import MyBookingsPage from "./pages/MyBookingsPage";
 
 // Placeholder pages (to be created later)
 const TurfsPage = () => (
@@ -157,14 +158,7 @@ const App: React.FC = () => {
               element={
                 <ProtectedRoute requiredRoles={["admin", "customer"]}>
                   <AppLayout>
-                    <div className="text-center py-12">
-                      <h1 className="text-2xl font-bold text-gray-800 mb-4">
-                        My Bookings
-                      </h1>
-                      <p className="text-gray-600">
-                        Booking management coming soon...
-                      </p>
-                    </div>
+                    <MyBookingsPage />
                   </AppLayout>
                 </ProtectedRoute>
               }

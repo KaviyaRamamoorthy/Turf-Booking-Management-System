@@ -4,6 +4,7 @@ import { Button } from "primereact/button";
 import { Badge } from "primereact/badge";
 import { Rating } from "primereact/rating";
 import type { Turf } from "../../types";
+import turfImage from "../../assets/turf.jpg";
 
 interface TurfCardProps {
   turf: Turf;
@@ -36,58 +37,65 @@ const TurfCard: React.FC<TurfCardProps> = ({
   };
 
   const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency: currency,
+      currency: "INR",
     }).format(amount);
+  };
+
+  const getCategoryDisplayName = (category: string) => {
+    switch (category.toLowerCase()) {
+      case "football":
+        return "Football";
+      case "cricket":
+        return "Cricket";
+      case "tennis":
+        return "Tennis";
+      case "basketball":
+        return "Basketball";
+      case "volleyball":
+        return "Multi-Sport";
+      default:
+        return category;
+    }
   };
 
   const header = (
     <div className="relative">
       <img
-        src={
-          turf.images[0] ||
-          "https://via.placeholder.com/400x250/4CAF50/FFFFFF?text=Turf+Image"
-        }
+        src={turfImage}
         alt={turf.name}
-        className="w-full h-48 object-cover"
+        className="w-full h-48 object-cover rounded-t-lg"
       />
-      <div className="absolute top-2 right-2">
+      <div className="absolute top-3 left-3">
         <Badge
-          value={turf.category}
+          value={getCategoryDisplayName(turf.category)}
           severity={getCategoryColor(turf.category)}
-          className="capitalize"
+          className="text-xs font-medium"
         />
+      </div>
+      <div className="absolute top-3 right-3 bg-white rounded-full px-2 py-1 flex items-center gap-1">
+        <i className="pi pi-star-fill text-yellow-500 text-sm"></i>
+        <span className="text-sm font-medium">{turf.rating}</span>
       </div>
     </div>
   );
 
   const footer = (
-    <div className="flex justify-between items-center pt-2">
-      <div className="flex items-center gap-2">
-        <Rating
-          value={turf.rating}
-          readOnly
-          cancel={false}
-          className="text-sm"
-        />
-        <span className="text-sm text-gray-600">({turf.reviewCount})</span>
-      </div>
-      <div className="flex gap-2">
+    <div className="flex gap-2">
+      <Button
+        label="View Details"
+        outlined
+        className="flex-1 !border-blue-500 !text-blue-500 hover:!bg-blue-50"
+        onClick={() => onViewDetails?.(turf)}
+      />
+      {showBookButton && (
         <Button
-          label="View Details"
-          size="small"
-          outlined
-          onClick={() => onViewDetails?.(turf)}
+          label="Book Now"
+          className="flex-1 !bg-blue-500 !border-blue-500 hover:!bg-blue-600"
+          onClick={() => onBook?.(turf)}
         />
-        {showBookButton && (
-          <Button
-            label="Book Now"
-            size="small"
-            onClick={() => onBook?.(turf)}
-          />
-        )}
-      </div>
+      )}
     </div>
   );
 
@@ -95,33 +103,28 @@ const TurfCard: React.FC<TurfCardProps> = ({
     <Card
       header={header}
       footer={footer}
-      className="shadow-md hover:shadow-lg transition-shadow duration-200 h-full"
+      className="!border-0 !shadow-sm hover:!shadow-md transition-all duration-200 !rounded-lg !overflow-hidden"
     >
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold text-gray-800 mb-1">
-          {turf.name}
-        </h3>
-        <p className="text-sm text-gray-600 line-clamp-2">{turf.description}</p>
-
-        <div className="flex items-center text-sm text-gray-600">
-          <i className="pi pi-map-marker mr-1"></i>
-          <span>
-            {turf.location.city}, {turf.location.state}
-          </span>
+      <div className="space-y-3">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-1">
+            {turf.name}
+          </h3>
+          <div className="flex items-center text-sm text-gray-600 mb-2">
+            <i className="pi pi-map-marker mr-1 text-gray-400"></i>
+            <span>
+              {turf.location.city}, {turf.location.state}
+            </span>
+          </div>
         </div>
 
-        <div className="flex justify-between items-center">
+        <p className="text-sm text-gray-600 line-clamp-2">{turf.description}</p>
+
+        <div className="flex items-center justify-between">
           <div className="text-lg font-bold text-green-600">
             {formatCurrency(turf.pricing.hourlyRate, turf.pricing.currency)}
             <span className="text-sm font-normal text-gray-600">/hour</span>
           </div>
-
-          {turf.amenities.length > 0 && (
-            <div className="flex items-center text-sm text-gray-600">
-              <i className="pi pi-check-circle mr-1"></i>
-              <span>{turf.amenities.length} amenities</span>
-            </div>
-          )}
         </div>
       </div>
     </Card>

@@ -2,25 +2,25 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { TurfState, Turf, TurfFilters, TurfCategory } from "../../types";
 
-// Mock turf data - expanded with more categories and turfs
+// Mock turf data - updated to match API implementation structure
 const mockTurfs: Turf[] = [
   {
     id: "1",
-    name: "Premium Football Ground",
+    name: "Green Valley Cricket Ground",
     description:
-      "High-quality football turf with professional facilities and floodlights for evening matches",
-    category: "football",
+      "Professional cricket ground with excellent drainage system and natural grass surface. Perfect for tournaments and practice sessions.",
+    category: "cricket",
     location: {
-      address: "123 Sports Complex",
-      city: "New York",
-      state: "NY",
-      zipCode: "10001",
-      coordinates: { lat: 40.7128, lng: -74.006 },
+      address: "Block A, Sports Complex, Sector 18",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zipCode: "400703",
+      coordinates: { lat: 19.076, lng: 72.8777 },
     },
     pricing: {
-      hourlyRate: 50,
-      currency: "USD",
-      discounts: [{ type: "percentage", value: 10, minHours: 2 }],
+      hourlyRate: 2500,
+      currency: "INR",
+      discounts: [{ type: "percentage", value: 10, minHours: 3 }],
     },
     amenities: [
       {
@@ -31,76 +31,15 @@ const mockTurfs: Turf[] = [
       },
       {
         id: "2",
-        name: "Shower",
-        description: "Clean shower facilities",
+        name: "Changing Room",
+        description: "Clean changing facilities",
         icon: "shower",
       },
       {
         id: "3",
         name: "Equipment",
-        description: "Sports equipment rental",
+        description: "Cricket equipment rental",
         icon: "equipment",
-      },
-    ],
-    images: [
-      "https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=Football+Turf+1",
-      "https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=Football+Turf+2",
-    ],
-    availability: [
-      {
-        dayOfWeek: 1, // Monday
-        isOpen: true,
-        slots: [
-          {
-            startTime: "06:00",
-            endTime: "07:00",
-            isAvailable: true,
-            price: 50,
-          },
-          {
-            startTime: "07:00",
-            endTime: "08:00",
-            isAvailable: true,
-            price: 50,
-          },
-          {
-            startTime: "08:00",
-            endTime: "09:00",
-            isAvailable: false,
-            price: 50,
-          },
-        ],
-      },
-    ],
-    rating: 4.5,
-    reviewCount: 25,
-    vendorId: "3",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "2",
-    name: "Cricket Stadium",
-    description:
-      "Professional cricket ground with proper pitch and covered pavilion",
-    category: "cricket",
-    location: {
-      address: "456 Cricket Avenue",
-      city: "New York",
-      state: "NY",
-      zipCode: "10002",
-      coordinates: { lat: 40.7589, lng: -73.9851 },
-    },
-    pricing: {
-      hourlyRate: 75,
-      currency: "USD",
-    },
-    amenities: [
-      {
-        id: "1",
-        name: "Parking",
-        description: "Free parking available",
-        icon: "car",
       },
       {
         id: "4",
@@ -110,51 +49,57 @@ const mockTurfs: Turf[] = [
       },
     ],
     images: [
-      "https://via.placeholder.com/400x300/2196F3/FFFFFF?text=Cricket+Ground+1",
+      "https://via.placeholder.com/400x200/E5E7EB/6B7280?text=Cricket+Ground",
     ],
     availability: [
       {
-        dayOfWeek: 1, // Monday
+        dayOfWeek: 1,
         isOpen: true,
         slots: [
+          {
+            startTime: "06:00",
+            endTime: "08:00",
+            isAvailable: true,
+            price: 2500,
+          },
           {
             startTime: "08:00",
             endTime: "10:00",
             isAvailable: true,
-            price: 75,
+            price: 2500,
           },
           {
-            startTime: "10:00",
-            endTime: "12:00",
+            startTime: "16:00",
+            endTime: "18:00",
             isAvailable: true,
-            price: 75,
+            price: 2500,
           },
         ],
       },
     ],
     rating: 4.8,
-    reviewCount: 15,
+    reviewCount: 25,
     vendorId: "3",
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date("2024-01-15"),
+    updatedAt: new Date("2024-01-15"),
   },
   {
-    id: "3",
-    name: "Elite Tennis Courts",
+    id: "2",
+    name: "Champions Football Arena",
     description:
-      "Premium tennis courts with professional surface and net systems",
-    category: "tennis",
+      "FIFA standard football field with artificial turf and professional floodlights for evening matches and training.",
+    category: "football",
     location: {
-      address: "789 Tennis Club Lane",
-      city: "Brooklyn",
-      state: "NY",
-      zipCode: "11201",
-      coordinates: { lat: 40.6892, lng: -73.9442 },
+      address: "45, Stadium Road, Bandra West",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zipCode: "400050",
+      coordinates: { lat: 19.0596, lng: 72.8295 },
     },
     pricing: {
-      hourlyRate: 40,
-      currency: "USD",
-      discounts: [{ type: "percentage", value: 15, minHours: 3 }],
+      hourlyRate: 1800,
+      currency: "INR",
+      discounts: [{ type: "percentage", value: 15, minHours: 2 }],
     },
     amenities: [
       {
@@ -165,166 +110,25 @@ const mockTurfs: Turf[] = [
       },
       {
         id: "2",
-        name: "Shower",
-        description: "Clean shower facilities",
+        name: "Changing Room",
+        description: "Clean changing facilities",
         icon: "shower",
       },
       {
         id: "5",
-        name: "Pro Shop",
-        description: "Equipment and accessories",
-        icon: "shop",
-      },
-    ],
-    images: [
-      "https://via.placeholder.com/400x300/FF9800/FFFFFF?text=Tennis+Court+1",
-      "https://via.placeholder.com/400x300/FF9800/FFFFFF?text=Tennis+Court+2",
-    ],
-    availability: [
-      {
-        dayOfWeek: 1,
-        isOpen: true,
-        slots: [
-          {
-            startTime: "06:00",
-            endTime: "07:00",
-            isAvailable: true,
-            price: 40,
-          },
-          {
-            startTime: "07:00",
-            endTime: "08:00",
-            isAvailable: true,
-            price: 40,
-          },
-          {
-            startTime: "08:00",
-            endTime: "09:00",
-            isAvailable: true,
-            price: 40,
-          },
-        ],
-      },
-    ],
-    rating: 4.7,
-    reviewCount: 32,
-    vendorId: "3",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "4",
-    name: "Urban Basketball Court",
-    description:
-      "Modern indoor basketball court with air conditioning and professional hoops",
-    category: "basketball",
-    location: {
-      address: "321 Hoops Street",
-      city: "Queens",
-      state: "NY",
-      zipCode: "11374",
-      coordinates: { lat: 40.7505, lng: -73.837 },
-    },
-    pricing: {
-      hourlyRate: 35,
-      currency: "USD",
-    },
-    amenities: [
-      {
-        id: "1",
-        name: "Parking",
-        description: "Free parking available",
-        icon: "car",
-      },
-      {
-        id: "2",
-        name: "Shower",
-        description: "Clean shower facilities",
-        icon: "shower",
+        name: "Floodlights",
+        description: "Professional lighting",
+        icon: "light",
       },
       {
         id: "6",
-        name: "Air Conditioning",
-        description: "Climate controlled",
-        icon: "air",
-      },
-    ],
-    images: [
-      "https://via.placeholder.com/400x300/F44336/FFFFFF?text=Basketball+Court+1",
-    ],
-    availability: [
-      {
-        dayOfWeek: 1,
-        isOpen: true,
-        slots: [
-          {
-            startTime: "09:00",
-            endTime: "10:00",
-            isAvailable: true,
-            price: 35,
-          },
-          {
-            startTime: "10:00",
-            endTime: "11:00",
-            isAvailable: true,
-            price: 35,
-          },
-        ],
-      },
-    ],
-    rating: 4.3,
-    reviewCount: 18,
-    vendorId: "3",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: "5",
-    name: "Champions Football Arena",
-    description:
-      "State-of-the-art football facility with synthetic grass and stadium seating",
-    category: "football",
-    location: {
-      address: "555 Champions Way",
-      city: "Manhattan",
-      state: "NY",
-      zipCode: "10019",
-      coordinates: { lat: 40.7614, lng: -73.9776 },
-    },
-    pricing: {
-      hourlyRate: 80,
-      currency: "USD",
-      discounts: [{ type: "percentage", value: 20, minHours: 3 }],
-    },
-    amenities: [
-      {
-        id: "1",
-        name: "Parking",
-        description: "Free parking available",
-        icon: "car",
-      },
-      {
-        id: "2",
-        name: "Shower",
-        description: "Clean shower facilities",
-        icon: "shower",
-      },
-      {
-        id: "7",
-        name: "Stadium Seating",
+        name: "Seating",
         description: "Spectator seating",
         icon: "stadium",
       },
-      {
-        id: "8",
-        name: "Floodlights",
-        description: "Night games available",
-        icon: "light",
-      },
     ],
     images: [
-      "https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=Champions+Arena+1",
-      "https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=Champions+Arena+2",
+      "https://via.placeholder.com/400x200/E5E7EB/6B7280?text=Football+Arena",
     ],
     availability: [
       {
@@ -335,45 +139,45 @@ const mockTurfs: Turf[] = [
             startTime: "06:00",
             endTime: "07:00",
             isAvailable: true,
-            price: 80,
+            price: 1800,
           },
           {
             startTime: "07:00",
             endTime: "08:00",
             isAvailable: true,
-            price: 80,
+            price: 1800,
           },
           {
             startTime: "18:00",
             endTime: "19:00",
             isAvailable: true,
-            price: 80,
+            price: 1800,
           },
         ],
       },
     ],
-    rating: 4.9,
-    reviewCount: 47,
+    rating: 4.4,
+    reviewCount: 32,
     vendorId: "3",
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date("2024-01-10"),
+    updatedAt: new Date("2024-01-10"),
   },
   {
-    id: "6",
-    name: "Volleyball Paradise",
+    id: "3",
+    name: "SportsPlex Multi-Ground",
     description:
-      "Professional volleyball court with sand surface and net regulation height",
+      "Versatile sports facility supporting multiple games including cricket, football, and badminton with modern facilities.",
     category: "volleyball",
     location: {
-      address: "888 Beach View Drive",
-      city: "Staten Island",
-      state: "NY",
-      zipCode: "10301",
-      coordinates: { lat: 40.6118, lng: -74.1558 },
+      address: "Plot 12, Industrial Estate, Andheri East",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zipCode: "400069",
+      coordinates: { lat: 19.1136, lng: 72.8697 },
     },
     pricing: {
-      hourlyRate: 30,
-      currency: "USD",
+      hourlyRate: 2000,
+      currency: "INR",
     },
     amenities: [
       {
@@ -383,20 +187,26 @@ const mockTurfs: Turf[] = [
         icon: "car",
       },
       {
-        id: "9",
-        name: "Sand Court",
-        description: "Professional sand surface",
-        icon: "sand",
+        id: "2",
+        name: "Changing Room",
+        description: "Clean changing facilities",
+        icon: "shower",
       },
       {
-        id: "10",
-        name: "Beach Setting",
-        description: "Scenic beach location",
-        icon: "beach",
+        id: "7",
+        name: "Cafeteria",
+        description: "Food and beverages",
+        icon: "food",
+      },
+      {
+        id: "8",
+        name: "Equipment Rental",
+        description: "Sports equipment available",
+        icon: "equipment",
       },
     ],
     images: [
-      "https://via.placeholder.com/400x300/9C27B0/FFFFFF?text=Volleyball+Court+1",
+      "https://via.placeholder.com/400x200/E5E7EB/6B7280?text=Multi+Ground",
     ],
     availability: [
       {
@@ -404,31 +214,267 @@ const mockTurfs: Turf[] = [
         isOpen: true,
         slots: [
           {
+            startTime: "07:00",
+            endTime: "08:00",
+            isAvailable: true,
+            price: 2000,
+          },
+          {
             startTime: "08:00",
             endTime: "09:00",
             isAvailable: true,
-            price: 30,
+            price: 2000,
           },
+          {
+            startTime: "17:00",
+            endTime: "18:00",
+            isAvailable: true,
+            price: 2000,
+          },
+        ],
+      },
+    ],
+    rating: 4.7,
+    reviewCount: 18,
+    vendorId: "3",
+    createdAt: new Date("2024-01-20"),
+    updatedAt: new Date("2024-01-20"),
+  },
+  {
+    id: "4",
+    name: "Elite Tennis Courts",
+    description:
+      "Premium tennis courts with synthetic grass surface and professional net systems. Ideal for coaching and tournaments.",
+    category: "tennis",
+    location: {
+      address: "23, Club Road, Juhu",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zipCode: "400049",
+      coordinates: { lat: 19.1075, lng: 72.8263 },
+    },
+    pricing: {
+      hourlyRate: 1500,
+      currency: "INR",
+      discounts: [{ type: "percentage", value: 20, minHours: 2 }],
+    },
+    amenities: [
+      {
+        id: "1",
+        name: "Parking",
+        description: "Free parking available",
+        icon: "car",
+      },
+      {
+        id: "2",
+        name: "Changing Room",
+        description: "Clean changing facilities",
+        icon: "shower",
+      },
+      {
+        id: "9",
+        name: "Pro Shop",
+        description: "Tennis equipment store",
+        icon: "shop",
+      },
+      {
+        id: "10",
+        name: "Coaching",
+        description: "Professional coaching available",
+        icon: "coach",
+      },
+    ],
+    images: [
+      "https://via.placeholder.com/400x200/E5E7EB/6B7280?text=Tennis+Courts",
+    ],
+    availability: [
+      {
+        dayOfWeek: 1,
+        isOpen: true,
+        slots: [
+          {
+            startTime: "06:00",
+            endTime: "07:00",
+            isAvailable: true,
+            price: 1500,
+          },
+          {
+            startTime: "07:00",
+            endTime: "08:00",
+            isAvailable: true,
+            price: 1500,
+          },
+          {
+            startTime: "16:00",
+            endTime: "17:00",
+            isAvailable: true,
+            price: 1500,
+          },
+        ],
+      },
+    ],
+    rating: 4.6,
+    reviewCount: 28,
+    vendorId: "3",
+    createdAt: new Date("2024-01-12"),
+    updatedAt: new Date("2024-01-12"),
+  },
+  {
+    id: "5",
+    name: "Urban Basketball Court",
+    description:
+      "Modern indoor basketball court with wooden flooring, air conditioning, and professional hoops. Perfect for leagues and practice.",
+    category: "basketball",
+    location: {
+      address: "Building 7, Phoenix Mall, Lower Parel",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zipCode: "400013",
+      coordinates: { lat: 19.0176, lng: 72.8318 },
+    },
+    pricing: {
+      hourlyRate: 1200,
+      currency: "INR",
+    },
+    amenities: [
+      {
+        id: "1",
+        name: "Parking",
+        description: "Mall parking available",
+        icon: "car",
+      },
+      {
+        id: "2",
+        name: "Changing Room",
+        description: "Clean changing facilities",
+        icon: "shower",
+      },
+      {
+        id: "11",
+        name: "Air Conditioning",
+        description: "Climate controlled",
+        icon: "air",
+      },
+      {
+        id: "12",
+        name: "Scoreboard",
+        description: "Electronic scoreboard",
+        icon: "score",
+      },
+    ],
+    images: [
+      "https://via.placeholder.com/400x200/E5E7EB/6B7280?text=Basketball+Court",
+    ],
+    availability: [
+      {
+        dayOfWeek: 1,
+        isOpen: true,
+        slots: [
           {
             startTime: "09:00",
             endTime: "10:00",
             isAvailable: true,
-            price: 30,
+            price: 1200,
           },
           {
             startTime: "10:00",
             endTime: "11:00",
             isAvailable: true,
-            price: 30,
+            price: 1200,
+          },
+          {
+            startTime: "18:00",
+            endTime: "19:00",
+            isAvailable: true,
+            price: 1200,
           },
         ],
       },
     ],
-    rating: 4.4,
-    reviewCount: 22,
+    rating: 4.3,
+    reviewCount: 15,
     vendorId: "3",
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date("2024-01-08"),
+    updatedAt: new Date("2024-01-08"),
+  },
+  {
+    id: "6",
+    name: "Premier Football Ground",
+    description:
+      "Top-notch football facility with natural grass, professional drainage, and stadium-style seating for matches.",
+    category: "football",
+    location: {
+      address: "78, Eastern Express Highway, Thane",
+      city: "Thane",
+      state: "Maharashtra",
+      zipCode: "400601",
+      coordinates: { lat: 19.2183, lng: 72.9781 },
+    },
+    pricing: {
+      hourlyRate: 2200,
+      currency: "INR",
+      discounts: [{ type: "percentage", value: 12, minHours: 2 }],
+    },
+    amenities: [
+      {
+        id: "1",
+        name: "Parking",
+        description: "Free parking available",
+        icon: "car",
+      },
+      {
+        id: "2",
+        name: "Changing Room",
+        description: "Clean changing facilities",
+        icon: "shower",
+      },
+      {
+        id: "5",
+        name: "Floodlights",
+        description: "Professional lighting",
+        icon: "light",
+      },
+      {
+        id: "13",
+        name: "Stadium Seating",
+        description: "Spectator stands",
+        icon: "stadium",
+      },
+    ],
+    images: [
+      "https://via.placeholder.com/400x200/E5E7EB/6B7280?text=Football+Ground",
+    ],
+    availability: [
+      {
+        dayOfWeek: 1,
+        isOpen: true,
+        slots: [
+          {
+            startTime: "06:00",
+            endTime: "07:00",
+            isAvailable: true,
+            price: 2200,
+          },
+          {
+            startTime: "07:00",
+            endTime: "08:00",
+            isAvailable: true,
+            price: 2200,
+          },
+          {
+            startTime: "17:00",
+            endTime: "18:00",
+            isAvailable: true,
+            price: 2200,
+          },
+        ],
+      },
+    ],
+    rating: 4.9,
+    reviewCount: 42,
+    vendorId: "3",
+    createdAt: new Date("2024-01-05"),
+    updatedAt: new Date("2024-01-05"),
   },
 ];
 

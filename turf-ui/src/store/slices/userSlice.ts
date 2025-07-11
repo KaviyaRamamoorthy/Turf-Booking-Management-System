@@ -1,23 +1,23 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import type { UserState, User, ProfileForm } from '../../types';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import type { UserState, User, ProfileForm } from "../../types";
 
 // Async thunks
 export const fetchUserProfile = createAsyncThunk(
-  'user/fetchProfile',
+  "user/fetchProfile",
   async (_, { rejectWithValue }) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       // Mock user profile
       const user: User = {
-        id: '2',
-        email: 'customer@turf.com',
-        name: 'John Customer',
-        phone: '+1234567891',
-        role: 'customer',
+        id: "2",
+        email: "customer@turf.com",
+        name: "John Customer",
+        phone: "+1234567891",
+        role: "customer",
         preferences: {
-          theme: 'light',
-          language: 'en',
+          theme: "light",
+          language: "en",
           notifications: true,
         },
         createdAt: new Date(),
@@ -25,30 +25,34 @@ export const fetchUserProfile = createAsyncThunk(
       };
       return user;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch profile');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to fetch profile"
+      );
     }
   }
 );
 
 export const updateUserProfile = createAsyncThunk(
-  'user/updateProfile',
+  "user/updateProfile",
   async (profileData: ProfileForm, { rejectWithValue }) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       // Mock updated user
       const updatedUser: User = {
-        id: '2',
-        email: 'customer@turf.com',
+        id: "2",
+        email: "customer@turf.com",
         name: profileData.name,
         phone: profileData.phone,
-        role: 'customer',
+        role: "customer",
         preferences: profileData.preferences,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
       return updatedUser;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to update profile');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to update profile"
+      );
     }
   }
 );
@@ -60,7 +64,7 @@ const initialState: UserState = {
 };
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
     clearError: (state) => {
@@ -99,4 +103,4 @@ const userSlice = createSlice({
 });
 
 export const { clearError } = userSlice.actions;
-export default userSlice.reducer; 
+export default userSlice.reducer;

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import { InputText } from 'primereact/inputtext';
-import { Password } from 'primereact/password';
-import { Button } from 'primereact/button';
-import { Checkbox } from 'primereact/checkbox';
-import { Message } from 'primereact/message';
-import { loginUser } from '../../store/slices/authSlice';
-import type { RootState } from '../../types';
-import type { AppDispatch } from '../../store';
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { InputText } from "primereact/inputtext";
+import { Password } from "primereact/password";
+import { Button } from "primereact/button";
+import { Checkbox } from "primereact/checkbox";
+import { Message } from "primereact/message";
+import { loginUser } from "../../store/slices/authSlice";
+import type { RootState } from "../../types";
+import type { AppDispatch } from "../../store";
 
 const LoginPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -16,9 +16,9 @@ const LoginPage = () => {
   const { isLoading, error } = useSelector((state: RootState) => state.auth);
 
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false
+    email: "",
+    password: "",
+    rememberMe: false,
   });
   const [validationErrors, setValidationErrors] = useState<{
     email?: string;
@@ -26,10 +26,10 @@ const LoginPage = () => {
   }>({});
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear validation error when user starts typing
     if (validationErrors[field as keyof typeof validationErrors]) {
-      setValidationErrors(prev => ({ ...prev, [field]: undefined }));
+      setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -37,13 +37,13 @@ const LoginPage = () => {
     const errors: { email?: string; password?: string } = {};
 
     if (!formData.email.trim()) {
-      errors.email = 'Email is required';
+      errors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
+      errors.email = "Please enter a valid email address";
     }
 
     if (!formData.password.trim()) {
-      errors.password = 'Password is required';
+      errors.password = "Password is required";
     }
 
     setValidationErrors(errors);
@@ -63,16 +63,16 @@ const LoginPage = () => {
       const loginCredentials = {
         email: formData.email,
         password: formData.password,
-        role: 'admin' as const
+        role: "admin" as const,
       };
 
       await dispatch(loginUser(loginCredentials)).unwrap();
 
-      // Redirect to admin dashboard on successful login
-      navigate('/dashboard/admin');
+      // Redirect to Home page on successful login
+      navigate("/home");
     } catch (error) {
       // Error handling is done by Redux
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
     }
   };
 
@@ -93,7 +93,10 @@ const LoginPage = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email Address
               </label>
               <div className="relative">
@@ -102,38 +105,51 @@ const LoginPage = () => {
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`w-full ${validationErrors.email ? 'p-invalid' : ''}`}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    className={`w-full ${
+                      validationErrors.email ? "p-invalid" : ""
+                    }`}
                     placeholder="Enter your email"
                     autoComplete="email"
                   />
                   <i className="pi pi-envelope" />
                 </span>
                 {validationErrors.email && (
-                  <small className="p-error block mt-1">{validationErrors.email}</small>
+                  <small className="p-error block mt-1">
+                    {validationErrors.email}
+                  </small>
                 )}
               </div>
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <div className="relative w-full">
                 <Password
                   id="password"
                   value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`w-full ${validationErrors.password ? 'p-invalid' : ''}`}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
+                  className={`w-full ${
+                    validationErrors.password ? "p-invalid" : ""
+                  }`}
                   placeholder="Enter your password"
                   autoComplete="current-password"
                   toggleMask
                   feedback={false}
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                 />
                 {validationErrors.password && (
-                  <small className="p-error block mt-1">{validationErrors.password}</small>
+                  <small className="p-error block mt-1">
+                    {validationErrors.password}
+                  </small>
                 )}
               </div>
             </div>
@@ -144,35 +160,37 @@ const LoginPage = () => {
                 <Checkbox
                   inputId="rememberMe"
                   checked={formData.rememberMe}
-                  onChange={(e) => handleInputChange('rememberMe', e.checked)}
+                  onChange={(e) => handleInputChange("rememberMe", e.checked)}
                 />
-                <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-600">
+                <label
+                  htmlFor="rememberMe"
+                  className="ml-2 text-sm text-gray-600"
+                >
                   Remember me
                 </label>
               </div>
-              <a href="#" className="text-sm text-blue-600 hover:text-blue-800 transition-colors">
+              <a
+                href="#"
+                className="text-sm text-blue-600 hover:text-blue-800 transition-colors"
+              >
                 Forgot password?
               </a>
             </div>
 
             {/* Error Message */}
             {error && (
-              <Message
-                severity="error"
-                text={error}
-                className="w-full"
-              />
+              <Message severity="error" text={error} className="w-full" />
             )}
 
             {/* Login Button */}
             <Button
               type="submit"
-              label={isLoading ? 'Signing in...' : 'Sign In'}
-              icon={isLoading ? 'pi pi-spinner pi-spin' : 'pi pi-sign-in'}
+              label={isLoading ? "Signing in..." : "Sign In"}
+              icon={isLoading ? "pi pi-spinner pi-spin" : "pi pi-sign-in"}
               className="!w-full !bg-green-500 "
               loading={isLoading}
               disabled={isLoading}
-              style={{ color: 'white', fontWeight: 'bold' }}
+              style={{ color: "white", fontWeight: "bold" }}
             />
 
             {/* Demo Info */}
@@ -181,7 +199,10 @@ const LoginPage = () => {
                 <i className="pi pi-info-circle text-blue-600 mt-0.5 mr-2"></i>
                 <div className="text-sm text-blue-800">
                   <p className="font-medium mb-1">Demo Mode</p>
-                  <p>Any email and password combination will work. You'll be logged in as an admin.</p>
+                  <p>
+                    Any email and password combination will work. You'll be
+                    logged in as an admin.
+                  </p>
                 </div>
               </div>
             </div>
@@ -189,8 +210,11 @@ const LoginPage = () => {
             {/* Sign Up Link */}
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
-                <Link to="/auth/register" className="text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                Don't have an account?{" "}
+                <Link
+                  to="/auth/register"
+                  className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                >
                   Sign up
                 </Link>
               </p>
@@ -209,4 +233,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;

@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Card } from 'primereact/card';
-import { Button } from 'primereact/button';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import type { RootState } from '../../types';
-import { fetchAdminStats } from '../../store/slices/adminSlice';
-import RoleSwitcher from '../../components/common/RoleSwitcher';
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Card } from "primereact/card";
+import { Button } from "primereact/button";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import type { RootState } from "../../types";
+import { fetchAdminStats } from "../../store/slices/adminSlice";
+import RoleSwitcher from "../../components/common/RoleSwitcher";
 
 const AdminDashboard: React.FC = () => {
   const dispatch = useDispatch();
@@ -18,20 +18,41 @@ const AdminDashboard: React.FC = () => {
   }, [dispatch]);
 
   const recentBookings = [
-    { id: '1', customer: 'John Doe', turf: 'Premium Football Ground', date: '2024-01-15', status: 'Confirmed' },
-    { id: '2', customer: 'Jane Smith', turf: 'Cricket Stadium', date: '2024-01-16', status: 'Pending' },
-    { id: '3', customer: 'Mike Johnson', turf: 'Tennis Court', date: '2024-01-17', status: 'Completed' },
+    {
+      id: "1",
+      customer: "John Doe",
+      turf: "Premium Football Ground",
+      date: "2024-01-15",
+      status: "Confirmed",
+    },
+    {
+      id: "2",
+      customer: "Jane Smith",
+      turf: "Cricket Stadium",
+      date: "2024-01-16",
+      status: "Pending",
+    },
+    {
+      id: "3",
+      customer: "Mike Johnson",
+      turf: "Tennis Court",
+      date: "2024-01-17",
+      status: "Completed",
+    },
   ];
 
   const statusBodyTemplate = (rowData: any) => {
-    const statusClass = {
-      'Confirmed': 'bg-green-100 text-green-800',
-      'Pending': 'bg-yellow-100 text-yellow-800',
-      'Completed': 'bg-blue-100 text-blue-800',
-    }[rowData.status] || 'bg-gray-100 text-gray-800';
+    const statusClass =
+      {
+        Confirmed: "bg-green-100 text-green-800",
+        Pending: "bg-yellow-100 text-yellow-800",
+        Completed: "bg-blue-100 text-blue-800",
+      }[rowData.status] || "bg-gray-100 text-gray-800";
 
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusClass}`}>
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium ${statusClass}`}
+      >
         {rowData.status}
       </span>
     );
@@ -39,12 +60,10 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <RoleSwitcher />
+      {/* <RoleSwitcher /> */}
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg">
-        <h1 className="text-3xl font-bold mb-2">
-          Welcome back, {user?.name}!
-        </h1>
+        <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h1>
         <p className="text-blue-100">
           Here's what's happening with your turf booking system today.
         </p>
@@ -104,19 +123,25 @@ const AdminDashboard: React.FC = () => {
             label="Manage Turfs"
             icon="pi pi-map-marker"
             className="p-button-outlined"
-            onClick={() => {/* Navigate to turf management */}}
+            onClick={() => {
+              /* Navigate to turf management */
+            }}
           />
           <Button
             label="View Users"
             icon="pi pi-users"
             className="p-button-outlined"
-            onClick={() => {/* Navigate to user management */}}
+            onClick={() => {
+              /* Navigate to user management */
+            }}
           />
           <Button
             label="Generate Reports"
             icon="pi pi-chart-bar"
             className="p-button-outlined"
-            onClick={() => {/* Navigate to reports */}}
+            onClick={() => {
+              /* Navigate to reports */
+            }}
           />
         </div>
       </Card>
@@ -131,11 +156,16 @@ const AdminDashboard: React.FC = () => {
           className="p-datatable-sm"
           loading={isLoading}
         >
-          <Column field="id" header="ID" style={{ width: '10%' }} />
-          <Column field="customer" header="Customer" style={{ width: '25%' }} />
-          <Column field="turf" header="Turf" style={{ width: '30%' }} />
-          <Column field="date" header="Date" style={{ width: '15%' }} />
-          <Column field="status" header="Status" body={statusBodyTemplate} style={{ width: '20%' }} />
+          <Column field="id" header="ID" style={{ width: "10%" }} />
+          <Column field="customer" header="Customer" style={{ width: "25%" }} />
+          <Column field="turf" header="Turf" style={{ width: "30%" }} />
+          <Column field="date" header="Date" style={{ width: "15%" }} />
+          <Column
+            field="status"
+            header="Status"
+            body={statusBodyTemplate}
+            style={{ width: "20%" }}
+          />
         </DataTable>
       </Card>
 
@@ -145,7 +175,9 @@ const AdminDashboard: React.FC = () => {
           <div className="text-center text-gray-500">
             <i className="pi pi-chart-line text-4xl mb-4"></i>
             <p>Revenue chart will be displayed here</p>
-            <p className="text-sm">Chart component integration coming soon...</p>
+            <p className="text-sm">
+              Chart component integration coming soon...
+            </p>
           </div>
         </div>
       </Card>
@@ -153,4 +185,4 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
-export default AdminDashboard; 
+export default AdminDashboard;

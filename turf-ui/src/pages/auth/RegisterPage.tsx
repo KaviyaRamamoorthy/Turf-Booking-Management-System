@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
-import { Button } from 'primereact/button';
-import { Message } from 'primereact/message';
-import { registerUser } from '../../store/slices/authSlice';
-import type { RootState } from '../../types';
-import type { AppDispatch } from '../../store';
-import CustomInput from '../../components/common/CustomInput';
-import CustomEmailInput from '../../components/common/CustomEmailInput';
-import CustomDropdown from '../../components/common/CustomDropdown';
-import { InputOtp } from 'primereact/inputotp';
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, Link } from "react-router-dom";
+import { Button } from "primereact/button";
+import { Message } from "primereact/message";
+import { registerUser } from "../../store/slices/authSlice";
+import type { RootState } from "../../types";
+import type { AppDispatch } from "../../store";
+import CustomInput from "../../components/common/CustomInput";
+import CustomEmailInput from "../../components/common/CustomEmailInput";
+import CustomDropdown from "../../components/common/CustomDropdown";
+import { InputOtp } from "primereact/inputotp";
 
 const RegisterPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -17,15 +17,15 @@ const RegisterPage = () => {
   const { isLoading, error } = useSelector((state: RootState) => state.auth);
 
   const [formData, setFormData] = useState({
-    fullName: '',
-    pincode: '',
-    state: '',
-    city: '',
-    email: '',
-    phoneNumber: '',
-    password: '',
-    confirmPassword: '',
-    otp: ''
+    fullName: "",
+    pincode: "",
+    state: "",
+    city: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+    otp: "",
   });
 
   const [validationErrors, setValidationErrors] = useState<{
@@ -45,19 +45,41 @@ const RegisterPage = () => {
 
   // Indian states for dropdown
   const states = [
-    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
-    'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
-    'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
-    'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-    'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
+    "Andhra Pradesh",
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chhattisgarh",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal",
   ];
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear validation error when user starts typing
     if (validationErrors[field as keyof typeof validationErrors]) {
-      setValidationErrors(prev => ({ ...prev, [field]: undefined }));
+      setValidationErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -65,51 +87,51 @@ const RegisterPage = () => {
     const errors: typeof validationErrors = {};
 
     if (!formData.fullName.trim()) {
-      errors.fullName = 'Full name is required';
+      errors.fullName = "Full name is required";
     }
 
     if (!formData.pincode.trim()) {
-      errors.pincode = 'Pincode is required';
+      errors.pincode = "Pincode is required";
     } else if (!/^\d{6}$/.test(formData.pincode)) {
-      errors.pincode = 'Pincode must be 6 digits';
+      errors.pincode = "Pincode must be 6 digits";
     }
 
     if (!formData.state) {
-      errors.state = 'State is required';
+      errors.state = "State is required";
     }
 
     if (!formData.city.trim()) {
-      errors.city = 'City is required';
+      errors.city = "City is required";
     }
 
     if (!formData.email.trim()) {
-      errors.email = 'Email is required';
+      errors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
+      errors.email = "Please enter a valid email address";
     }
 
     if (!formData.phoneNumber.trim()) {
-      errors.phoneNumber = 'Phone number is required';
+      errors.phoneNumber = "Phone number is required";
     } else if (!/^\d{10}$/.test(formData.phoneNumber)) {
-      errors.phoneNumber = 'Phone number must be 10 digits';
+      errors.phoneNumber = "Phone number must be 10 digits";
     }
 
     if (!formData.password.trim()) {
-      errors.password = 'Password is required';
+      errors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
+      errors.password = "Password must be at least 6 characters";
     }
 
     if (!formData.confirmPassword.trim()) {
-      errors.confirmPassword = 'Please confirm your password';
+      errors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
+      errors.confirmPassword = "Passwords do not match";
     }
 
     if (otpFieldEnabled && !formData.otp.trim()) {
-      errors.otp = 'OTP is required';
+      errors.otp = "OTP is required";
     } else if (otpFieldEnabled && !/^\d{6}$/.test(formData.otp)) {
-      errors.otp = 'OTP must be 6 digits';
+      errors.otp = "OTP must be 6 digits";
     }
 
     setValidationErrors(errors);
@@ -117,18 +139,22 @@ const RegisterPage = () => {
   };
 
   const isFormComplete = () => {
-    return formData.fullName.trim() && 
-           formData.pincode.trim() && 
-           formData.state && 
-           formData.city.trim() && 
-           formData.email.trim() && 
-           formData.phoneNumber.trim() &&
-           formData.password.trim() &&
-           formData.confirmPassword.trim();
+    return (
+      formData.fullName.trim() &&
+      formData.pincode.trim() &&
+      formData.state &&
+      formData.city.trim() &&
+      formData.email.trim() &&
+      formData.phoneNumber.trim() &&
+      formData.password.trim() &&
+      formData.confirmPassword.trim()
+    );
   };
 
   const isOtpComplete = () => {
-    return otpFieldEnabled && formData.otp.trim() && /^\d{6}$/.test(formData.otp);
+    return (
+      otpFieldEnabled && formData.otp.trim() && /^\d{6}$/.test(formData.otp)
+    );
   };
 
   const handleSendOtp = async () => {
@@ -138,19 +164,19 @@ const RegisterPage = () => {
     }
     try {
       // Mock OTP service call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setOtpSent(true);
       // Show success message (you can add a toast notification here)
-      console.log('OTP sent successfully!');
+      console.log("OTP sent successfully!");
     } catch (error) {
-      console.error('Failed to send OTP:', error);
+      console.error("Failed to send OTP:", error);
     }
   };
 
   const handleOtpChange = (value: string) => {
-    setFormData(prev => ({ ...prev, otp: value }));
+    setFormData((prev) => ({ ...prev, otp: value }));
     if (validationErrors.otp) {
-      setValidationErrors(prev => ({ ...prev, otp: undefined }));
+      setValidationErrors((prev) => ({ ...prev, otp: undefined }));
     }
   };
 
@@ -168,20 +194,20 @@ const RegisterPage = () => {
         phone: formData.phoneNumber,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
-        role: 'customer' as const, // Default to customer role
+        role: "customer" as const, // Default to customer role
         address: {
           pincode: formData.pincode,
           state: formData.state,
-          city: formData.city
-        }
+          city: formData.city,
+        },
       };
 
       await dispatch(registerUser(registerData)).unwrap();
 
       // Redirect to login page after successful registration
-      navigate('/auth/login');
+      navigate("/auth/login");
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error("Registration failed:", error);
     }
   };
 
@@ -191,7 +217,7 @@ const RegisterPage = () => {
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-lg mb-4">
-            <i className="pi pi-user-plus text-3xl text-green-600"></i>
+            <i className="pi pi-user-plus text-3xl text-blue-600"></i>
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
           <p className="text-white/80">Join Turf Booking today</p>
@@ -205,7 +231,7 @@ const RegisterPage = () => {
               id="fullName"
               label="Full Name"
               value={formData.fullName}
-              onChange={e => handleInputChange('fullName', e.target.value)}
+              onChange={(e) => handleInputChange("fullName", e.target.value)}
               icon={<i className="pi pi-user" />}
               error={validationErrors.fullName}
               placeholder="Enter your full name"
@@ -215,7 +241,7 @@ const RegisterPage = () => {
               id="pincode"
               label="Pincode"
               value={formData.pincode}
-              onChange={e => handleInputChange('pincode', e.target.value)}
+              onChange={(e) => handleInputChange("pincode", e.target.value)}
               icon={<i className="pi pi-map-marker" />}
               error={validationErrors.pincode}
               placeholder="Enter 6-digit pincode"
@@ -227,7 +253,7 @@ const RegisterPage = () => {
               id="state"
               label="State"
               value={formData.state}
-              onChange={e => handleInputChange('state', e.value)}
+              onChange={(e) => handleInputChange("state", e.value)}
               options={states}
               placeholder="Select your state"
               error={validationErrors.state}
@@ -237,7 +263,7 @@ const RegisterPage = () => {
               id="city"
               label="City"
               value={formData.city}
-              onChange={e => handleInputChange('city', e.target.value)}
+              onChange={(e) => handleInputChange("city", e.target.value)}
               icon={<i className="pi pi-building" />}
               error={validationErrors.city}
               placeholder="Enter your city"
@@ -247,7 +273,7 @@ const RegisterPage = () => {
               id="email"
               label="Email Address"
               value={formData.email}
-              onChange={e => handleInputChange('email', e.target.value)}
+              onChange={(e) => handleInputChange("email", e.target.value)}
               error={validationErrors.email}
               placeholder="Enter your email"
             />
@@ -256,58 +282,121 @@ const RegisterPage = () => {
               id="phoneNumber"
               label="Phone Number"
               value={formData.phoneNumber}
-              onChange={e => handleInputChange('phoneNumber', e.target.value)}
+              onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
               icon={<i className="pi pi-phone" />}
               error={validationErrors.phoneNumber}
               placeholder="Enter 10-digit phone number"
               maxLength={10}
               inputMode="numeric"
             />
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <i className="pi pi-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
+                  placeholder="Enter your password"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    validationErrors.password
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                />
+              </div>
+              {validationErrors.password && (
+                <small className="text-red-500 block mt-1">
+                  {validationErrors.password}
+                </small>
+              )}
+            </div>
+            {/* Confirm Password Field */}
+            <div className="space-y-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Confirm Password
+              </label>
+              <div className="relative">
+                <i className="pi pi-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) =>
+                    handleInputChange("confirmPassword", e.target.value)
+                  }
+                  placeholder="Confirm your password"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    validationErrors.confirmPassword
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                />
+              </div>
+              {validationErrors.confirmPassword && (
+                <small className="text-red-500 block mt-1">
+                  {validationErrors.confirmPassword}
+                </small>
+              )}
+            </div>
             {/* Send OTP Button */}
             <Button
               type="button"
-              label={otpSent ? 'OTP Sent ✓' : 'Send OTP'}
-              icon={otpSent ? 'pi pi-check' : 'pi pi-send'}
-              className={`w-full ${otpSent ? '!bg-green-500' : '!bg-blue-500'}`}
+              label={otpSent ? "OTP Sent ✓" : "Send OTP"}
+              icon={otpSent ? "pi pi-check" : "pi pi-send"}
+              className={`w-full ${otpSent ? "!bg-blue-600" : "!bg-blue-500"}`}
               disabled={!isFormComplete() || otpSent}
               onClick={handleSendOtp}
-              style={{ color: 'white', fontWeight: 'bold' }}
+              style={{ color: "white", fontWeight: "bold" }}
             />
             {/* OTP Field */}
             <div className="space-y-2">
-              <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="otp"
+                className="block text-sm font-medium text-gray-700"
+              >
                 OTP
               </label>
               <InputOtp
                 id="otp"
                 value={formData.otp}
-                onChange={e => handleOtpChange(e.value as string)}
+                onChange={(e) => handleOtpChange(e.value as string)}
                 length={6}
-                className={`w-full ${validationErrors.otp ? 'p-invalid' : ''}`}
+                className={`w-full ${validationErrors.otp ? "p-invalid" : ""}`}
                 disabled={!otpFieldEnabled}
                 placeholder="-"
               />
               {validationErrors.otp && (
-                <small className="p-error block mt-1">{validationErrors.otp}</small>
+                <small className="p-error block mt-1">
+                  {validationErrors.otp}
+                </small>
               )}
             </div>
             {/* Error Message */}
             {error && (
-              <Message
-                severity="error"
-                text={error}
-                className="w-full"
-              />
+              <Message severity="error" text={error} className="w-full" />
             )}
             {/* Sign Up Button */}
             <Button
               type="submit"
-              label={isLoading ? 'Creating Account...' : 'Sign Up'}
-              icon={isLoading ? 'pi pi-spinner pi-spin' : 'pi pi-user-plus'}
-              className="!w-full !bg-green-500"
+              label={isLoading ? "Creating Account..." : "Sign Up"}
+              icon={isLoading ? "pi pi-spinner pi-spin" : "pi pi-user-plus"}
+              className="!w-full !bg-blue-600"
               loading={isLoading}
               disabled={isLoading || !isOtpComplete()}
-              style={{ color: 'white', fontWeight: 'bold' }}
+              style={{ color: "white", fontWeight: "bold" }}
             />
             {/* Demo Info */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -315,15 +404,20 @@ const RegisterPage = () => {
                 <i className="pi pi-info-circle text-blue-600 mt-0.5 mr-2"></i>
                 <div className="text-sm text-blue-800">
                   <p className="font-medium mb-1">Demo Mode</p>
-                  <p>OTP service is mocked. Any 6-digit number will work for OTP.</p>
+                  <p>
+                    OTP service is mocked. Any 6-digit number will work for OTP.
+                  </p>
                 </div>
               </div>
             </div>
             {/* Sign In Link */}
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link to="/auth/login" className="text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                Already have an account?{" "}
+                <Link
+                  to="/auth/login"
+                  className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                >
                   Sign in
                 </Link>
               </p>
@@ -341,4 +435,4 @@ const RegisterPage = () => {
   );
 };
 
-export default RegisterPage; 
+export default RegisterPage;

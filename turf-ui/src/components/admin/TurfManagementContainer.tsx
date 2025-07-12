@@ -1,14 +1,12 @@
-import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import TurfManagementPage from "../../pages/admin/TurfManagementPage";
-import TurfFormModal from "./TurfFormModal";
-import { closeModal, openModal } from "../../store/slices/uiSlice";
-import { deleteTurf } from "../../store/slices/turfSlice";
-import { addToast } from "../../store/slices/uiSlice";
-import type { Turf } from "../../types";
-import type { RootState } from "../../types";
 import type { AppDispatch } from "../../store";
+import { deleteTurf } from "../../store/slices/turfSlice";
+import { addToast, closeModal, openModal } from "../../store/slices/uiSlice";
+import type { RootState, Turf } from "../../types";
+import TurfFormModal from "./TurfFormModal";
 
 const TurfManagementContainer: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

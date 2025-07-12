@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import { BreadCrumb } from 'primereact/breadcrumb';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 import type { BreadcrumbItem } from '../../types';
 
 interface BreadcrumbProps {

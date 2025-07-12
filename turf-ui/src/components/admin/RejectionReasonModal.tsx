@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
 import { InputTextarea } from "primereact/inputtextarea";
+import React, { useState } from "react";
 
 interface RejectionReasonModalProps {
   visible: boolean;

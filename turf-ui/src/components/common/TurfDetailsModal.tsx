@@ -1,13 +1,10 @@
-import React from "react";
-import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
 import { Badge } from "primereact/badge";
-import { Rating } from "primereact/rating";
-import { Divider } from "primereact/divider";
+import { Button } from "primereact/button";
 import { Chip } from "primereact/chip";
-import { Tag } from "primereact/tag";
-import type { Turf } from "../../types";
+import { Dialog } from "primereact/dialog";
+import React from "react";
 import turfImage from "../../assets/turf.jpg";
+import type { Turf } from "../../types";
 
 interface TurfDetailsModalProps {
   turf: Turf | null;

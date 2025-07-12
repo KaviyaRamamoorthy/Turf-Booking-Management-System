@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import TurfBookingsPage from "../../pages/admin/TurfBookingsPage";
+import type { AppDispatch } from "../../store";
+import { fetchAllBookings } from "../../store/slices/adminBookingSlice";
+import type { RootState } from "../../types";
+import BookingDetailsModal from "./BookingDetailsModal";
 import TurfBookingsFilters from "./TurfBookingsFilters";
 import TurfBookingsHeader from "./TurfBookingsHeader";
 import TurfBookingsList from "./TurfBookingsList";
-import BookingDetailsModal from "./BookingDetailsModal";
-import { fetchAllBookings } from "../../store/slices/adminBookingSlice";
-import { openModal } from "../../store/slices/uiSlice";
-import type { RootState } from "../../types";
-import type { AppDispatch } from "../../store";
 
 const TurfBookingsContainer: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -22,7 +21,7 @@ const TurfBookingsContainer: React.FC = () => {
   // Initialize data on component mount
   useEffect(() => {
     if (!isInitialized) {
-      dispatch(fetchAllBookings());
+      dispatch(fetchAllBookings(filters));
       setIsInitialized(true);
     }
   }, [dispatch, isInitialized]);
@@ -51,7 +50,7 @@ const TurfBookingsContainer: React.FC = () => {
           <TurfBookingsList />
         </div>
       </TurfBookingsPage>
-      
+
       <BookingDetailsModal
         visible={isModalVisible}
         onHide={handleCloseModal}

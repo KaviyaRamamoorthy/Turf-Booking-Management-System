@@ -1,0 +1,32 @@
+{
+    "teamName": "truf management",
+    "aiModel": "gpt-4o",
+    "sharedContext": true,
+    "consistentSuggestions": true,
+    "codeStyle": {
+      "language": "typescript",
+      "framework": "react",
+      "naming": "camelCase",
+      "async": "async-await"
+    },
+    "qualityChecks": {
+      "requireTests": true,
+      "requireDocumentation": true,
+      "maxFunctionLength": 50
+    },
+    "codeAnalysis": {
+      "enableRealTimeAnalysis": true,
+      "qualityChecks": {
+        "complexity": "medium",
+        "maintainability": "strict",
+        "performance": "standard",
+        "security": "strict"
+      },
+      "autoSuggestions": {
+        "refactoring": true,
+        "optimization": true,
+        "documentation": true
+      }
+    }
+  }
+  

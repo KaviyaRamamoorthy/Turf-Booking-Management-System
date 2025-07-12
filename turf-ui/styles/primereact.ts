@@ -83,9 +83,11 @@ export const primereactPt = {
             )
         },
         input: {
-            className: classNames(
-                'ps-2'
-            )
+            root: {
+                className: classNames(
+                    'ps-2'
+                )
+            }
         }
     },
     multiselect: {

@@ -1,11 +1,11 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { Button } from 'primereact/button';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { RootState } from '../../types';
-import { toggleSidebar } from '../../store/slices/uiSlice';
 import { getMenuItemsForRole } from '../../constants/navigation';
 import type { AppDispatch } from '../../store';
+import { toggleSidebar } from '../../store/slices/uiSlice';
+import type { RootState } from '../../types';
 
 const Sidebar: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

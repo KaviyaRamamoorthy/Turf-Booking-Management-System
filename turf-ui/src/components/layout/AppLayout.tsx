@@ -1,9 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../types';
+import ToastContainer from '../common/ToastContainer';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import ToastContainer from '../common/ToastContainer';
 
 interface AppLayoutProps {
   children: React.ReactNode;

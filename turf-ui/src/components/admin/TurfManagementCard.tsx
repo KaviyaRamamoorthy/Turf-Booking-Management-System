@@ -1,15 +1,13 @@
-import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Card } from "primereact/card";
-import { Button } from "primereact/button";
 import { Badge } from "primereact/badge";
+import { Button } from "primereact/button";
+import { Card } from "primereact/card";
 import { Rating } from "primereact/rating";
-import { openModal } from "../../store/slices/uiSlice";
-import { deleteTurf } from "../../store/slices/turfSlice";
-import { addToast } from "../../store/slices/uiSlice";
-import type { Turf } from "../../types";
-import type { RootState } from "../../types";
+import React from "react";
+import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store";
+import { deleteTurf } from "../../store/slices/turfSlice";
+import { addToast, openModal } from "../../store/slices/uiSlice";
+import type { Turf } from "../../types";
 
 interface TurfManagementCardProps {
     turf: Turf;
@@ -131,7 +129,6 @@ const TurfManagementCard: React.FC<TurfManagementCardProps> = ({ turf, onEditTur
     );
 
     return (
-        <>
             <Card
                 header={header}
                 footer={footer}
@@ -167,7 +164,6 @@ const TurfManagementCard: React.FC<TurfManagementCardProps> = ({ turf, onEditTur
                     </div>
                 </div>
             </Card>
-        </>
     );
 };
 

@@ -1,10 +1,9 @@
-import React from "react";
-import { Card } from "primereact/card";
-import { Button } from "primereact/button";
 import { Badge } from "primereact/badge";
-import { Rating } from "primereact/rating";
-import type { Turf } from "../../types";
+import { Button } from "primereact/button";
+import { Card } from "primereact/card";
+import React from "react";
 import turfImage from "../../assets/turf.jpg";
+import type { Turf } from "../../types";
 
 interface TurfCardProps {
   turf: Turf;

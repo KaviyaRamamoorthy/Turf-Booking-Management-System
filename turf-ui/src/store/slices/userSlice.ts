@@ -8,7 +8,7 @@ export const fetchUserProfile = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      // Mock user profile
+      // Mock user profile with ISO string dates
       const user: User = {
         id: "2",
         email: "customer@turf.com",
@@ -20,8 +20,8 @@ export const fetchUserProfile = createAsyncThunk(
           language: "en",
           notifications: true,
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
       return user;
     } catch (error) {
@@ -37,7 +37,7 @@ export const updateUserProfile = createAsyncThunk(
   async (profileData: ProfileForm, { rejectWithValue }) => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      // Mock updated user
+      // Mock updated user profile with ISO string dates
       const updatedUser: User = {
         id: "2",
         email: "customer@turf.com",
@@ -45,8 +45,8 @@ export const updateUserProfile = createAsyncThunk(
         phone: profileData.phone,
         role: "customer",
         preferences: profileData.preferences,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
       return updatedUser;
     } catch (error) {

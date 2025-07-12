@@ -82,10 +82,10 @@ const LoginPage = () => {
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-lg mb-4">
-            <i className="pi pi-leaf text-3xl text-green-600"></i>
+            <i className="pi pi-sign-in text-3xl text-blue-600"></i>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Turf Booking</h1>
-          <p className="text-white/80">Sign in to your account</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
+          <p className="text-white/80">Join Turf Booking today</p>
         </div>
 
         {/* Login Card */}
@@ -190,22 +190,8 @@ const LoginPage = () => {
               disabled={isLoading}
             />
 
-            {/* Demo Info */}
-            <div className="bg-blue-50 mt-2 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start">
-                <i className="pi pi-info-circle text-blue-600 mt-0.5 mr-2"></i>
-                <div className="text-sm text-blue-800">
-                  <p className="font-medium mb-1">Demo Mode</p>
-                  <p>
-                    Any email and password combination will work. You'll be
-                    logged in as an admin.
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Sign Up Link */}
-            <div className="text-center">
+            <div className="text-center pt-3">
               <p className="text-sm text-gray-600">
                 Don't have an account?{" "}
                 <Link

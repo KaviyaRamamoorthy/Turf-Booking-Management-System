@@ -5,9 +5,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import type { RootState } from '../../types';
 import { toggleSidebar } from '../../store/slices/uiSlice';
 import { getMenuItemsForRole } from '../../constants/navigation';
+import type { AppDispatch } from '../../store';
 
 const Sidebar: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -42,14 +43,13 @@ const Sidebar: React.FC = () => {
           />
         </div>
 
-        {/* Navigation Menu */}
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
             {menuItems.map((item) => (
               <li key={item.id}>
                 <button
                   onClick={() => handleMenuClick(item.path)}
-                  className={`flex items-center w-full p-3 rounded-lg transition-colors ${
+                  className={`flex items-center w-full !p-2 rounded-lg transition-colors ${
                     isActiveRoute(item.path)
                       ? 'bg-blue-100 text-blue-700'
                       : 'text-gray-700 hover:bg-gray-100'

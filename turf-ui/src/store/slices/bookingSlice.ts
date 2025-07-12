@@ -14,7 +14,7 @@ const mockBookings: Booking[] = [
     id: "1",
     turfId: "Premium Football Ground",
     userId: "2",
-    date: new Date("2024-01-15"),
+    date: "2024-01-15T00:00:00.000Z",
     timeSlot: {
       startTime: "06:00",
       endTime: "07:00",
@@ -29,18 +29,18 @@ const mockBookings: Booking[] = [
       method: "card",
       status: "completed",
       transactionId: "txn_123",
-      paidAt: new Date("2024-01-14"),
+      paidAt: "2024-01-14T00:00:00.000Z",
     },
     totalAmount: 1500,
     notes: "Early morning game",
-    createdAt: new Date("2024-01-10"),
-    updatedAt: new Date("2024-01-10"),
+    createdAt: "2024-01-10T00:00:00.000Z",
+    updatedAt: "2024-01-10T00:00:00.000Z",
   },
   {
     id: "2",
     turfId: "Elite Cricket Ground",
     userId: "2",
-    date: new Date("2024-01-22"),
+    date: "2024-01-22T00:00:00.000Z",
     timeSlot: {
       startTime: "16:00",
       endTime: "17:00",
@@ -58,8 +58,8 @@ const mockBookings: Booking[] = [
     },
     totalAmount: 2000,
     notes: "Evening cricket session",
-    createdAt: new Date("2024-01-18"),
-    updatedAt: new Date("2024-01-18"),
+    createdAt: "2024-01-18T00:00:00.000Z",
+    updatedAt: "2024-01-18T00:00:00.000Z",
   },
   {
     id: "3",
@@ -163,7 +163,7 @@ export const createBooking = createAsyncThunk(
         id: (mockBookings.length + 1).toString(),
         turfId: bookingData.turfId,
         userId: "2", // Mock user ID
-        date: bookingData.date,
+        date: bookingData.date instanceof Date ? bookingData.date.toISOString() : bookingData.date,
         timeSlot: bookingData.timeSlot,
         status: "pending",
         payment: {
@@ -175,8 +175,8 @@ export const createBooking = createAsyncThunk(
         },
         totalAmount: bookingData.timeSlot.price,
         notes: bookingData.notes,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
       return newBooking;
     } catch (error) {

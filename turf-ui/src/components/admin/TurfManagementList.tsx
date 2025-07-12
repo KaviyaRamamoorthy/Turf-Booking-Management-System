@@ -9,9 +9,10 @@ import type { Turf } from "../../types";
 interface TurfManagementListProps {
   turfs: Turf[];
   onEditTurf?: (turf: Turf) => void;
+  onDeleteTurf?: (turf: Turf) => void;
 }
 
-const TurfManagementList: React.FC<TurfManagementListProps> = ({ turfs, onEditTurf }) => {
+const TurfManagementList: React.FC<TurfManagementListProps> = ({ turfs, onEditTurf, onDeleteTurf }) => {
   if (turfs.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
@@ -32,7 +33,7 @@ const TurfManagementList: React.FC<TurfManagementListProps> = ({ turfs, onEditTu
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {turfs.map((turf) => (
-          <TurfManagementCard key={turf.id} turf={turf} onEditTurf={onEditTurf} />
+          <TurfManagementCard key={turf.id} turf={turf} onEditTurf={onEditTurf} onDeleteTurf={onDeleteTurf} />
         ))}
       </div>
     </div>

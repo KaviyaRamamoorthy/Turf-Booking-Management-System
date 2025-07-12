@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import TurfManagementPage from "../../pages/admin/TurfManagementPage";
 import TurfFormModal from "./TurfFormModal";
 import { closeModal, openModal } from "../../store/slices/uiSlice";
+import { deleteTurf } from "../../store/slices/turfSlice";
+import { addToast } from "../../store/slices/uiSlice";
 import type { Turf } from "../../types";
 import type { RootState } from "../../types";
+import type { AppDispatch } from "../../store";
 
 const TurfManagementContainer: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { modals } = useSelector((state: RootState) => state.ui);
   const [selectedTurf, setSelectedTurf] = useState<Turf | null>(null);
   const [editMode, setEditMode] = useState(false);
@@ -38,15 +42,48 @@ const TurfManagementContainer: React.FC = () => {
     }, 100);
   };
 
+  const handleDeleteTurf = (turf: Turf) => {
+    confirmDialog({
+      message: `Are you sure you want to delete "${turf.name}"?`,
+      header: "Delete Confirmation",
+      icon: "pi pi-exclamation-triangle",
+      acceptClassName: "p-button-danger submit-button",
+      rejectClassName: "p-button-success cancel-button",
+      accept: () => {
+        dispatch(deleteTurf(turf.id))
+          .unwrap()
+          .then(() => {
+            dispatch(
+              addToast({
+                type: "success",
+                title: "Success",
+                message: "Turf deleted successfully",
+              })
+            );
+          })
+          .catch((error) => {
+            dispatch(
+              addToast({
+                type: "error",
+                title: "Error",
+                message: error || "Failed to delete turf",
+              })
+            );
+          });
+      },
+    });
+  };
+
   return (
     <>
-      <TurfManagementPage onEditTurf={handleEditTurf} onAddTurf={handleAddTurf} />
+      <TurfManagementPage onEditTurf={handleEditTurf} onAddTurf={handleAddTurf} onDeleteTurf={handleDeleteTurf} />
       <TurfFormModal
         visible={isModalVisible}
         onHide={handleCloseModal}
         editMode={editMode}
         turfToEdit={selectedTurf}
       />
+      <ConfirmDialog />
     </>
   );
 };

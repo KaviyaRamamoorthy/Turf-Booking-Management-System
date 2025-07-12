@@ -20,7 +20,9 @@ interface TurfManagementCardProps {
 const TurfManagementCard: React.FC<TurfManagementCardProps> = ({ turf, onEditTurf }) => {
     const dispatch = useDispatch<AppDispatch>();
 
-    const getCategoryColor = (category: string) => {
+    const getCategoryColor = (category: string | undefined) => {
+        if (!category) return "contrast";
+        
         switch (category.toLowerCase()) {
             case "football":
                 return "success";

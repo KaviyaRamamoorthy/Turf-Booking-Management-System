@@ -25,6 +25,7 @@ import CustomerDashboard from "./pages/dashboard/CustomerDashboard";
 import ProfilePage from "./pages/profile/ProfilePage";
 import HomePage from "./pages/HomePage";
 import TurfManagementContainer from "./components/admin/TurfManagementContainer";
+import TurfBookingsContainer from "./components/admin/TurfBookingsContainer";
 import MyBookingsPage from "./pages/MyBookingsPage";
 
 // Placeholder pages (to be created later)
@@ -131,6 +132,17 @@ const App: React.FC = () => {
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AppLayout>
                     <TurfManagementContainer />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin/bookings"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AppLayout>
+                    <TurfBookingsContainer />
                   </AppLayout>
                 </ProtectedRoute>
               }

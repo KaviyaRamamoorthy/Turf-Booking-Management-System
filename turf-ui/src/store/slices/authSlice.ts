@@ -21,8 +21,8 @@ const mockUsers: User[] = [
       language: "en",
       notifications: true,
     },
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
     id: "2",
@@ -35,8 +35,8 @@ const mockUsers: User[] = [
       language: "en",
       notifications: true,
     },
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   {
     id: "3",
@@ -49,8 +49,8 @@ const mockUsers: User[] = [
       language: "en",
       notifications: true,
     },
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
 ];
 
@@ -75,8 +75,8 @@ export const loginUser = createAsyncThunk(
           language: "en",
           notifications: true,
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       // Mock token generation
@@ -122,8 +122,8 @@ export const registerUser = createAsyncThunk(
           language: "en",
           notifications: true,
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       // Mock token generation

@@ -368,7 +368,7 @@ const ChangePasswordPage: React.FC = () => {
               type="submit"
               label={isLoading ? "Changing Password..." : "Change Password"}
               icon={isLoading ? "pi pi-spin pi-spinner" : "pi pi-check"}
-              className="!w-full !bg-blue-600 !border-blue-600 !text-white hover:!bg-blue-700 hover:!border-blue-700"
+              className="!w-full !bg-blue-600 !border-blue-600 !text-white hover:!bg-blue-700 hover:!border-blue-700 !mt-2"
               loading={isLoading}
               disabled={isLoading}
             />

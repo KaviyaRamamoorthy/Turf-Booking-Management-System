@@ -13,6 +13,23 @@ export interface User {
     city: string;
   };
   preferences: UserPreferences;
+  createdAt: string; // ISO string for Redux state
+  updatedAt: string; // ISO string for Redux state
+}
+
+// API User interface with Date objects
+export interface ApiUser {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  role: UserRole;
+  address?: {
+    pincode: string;
+    state: string;
+    city: string;
+  };
+  preferences: UserPreferences;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -93,6 +110,24 @@ export interface Turf {
   rating: number;
   reviewCount: number;
   vendorId: string;
+  createdAt: string; // ISO string for Redux state
+  updatedAt: string; // ISO string for Redux state
+}
+
+// API Turf interface with Date objects
+export interface ApiTurf {
+  id: string;
+  name: string;
+  description: string;
+  category: TurfCategory;
+  location: Location;
+  pricing: PricingInfo;
+  amenities: Amenity[];
+  images: string[];
+  availability: AvailabilitySchedule[];
+  rating: number;
+  reviewCount: number;
+  vendorId: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -131,6 +166,17 @@ export interface PaymentInfo {
   method: "card" | "cash" | "online";
   status: "pending" | "completed" | "failed" | "refunded";
   transactionId?: string;
+  paidAt?: string; // ISO string for Redux state
+}
+
+// API PaymentInfo interface with Date objects
+export interface ApiPaymentInfo {
+  id: string;
+  amount: number;
+  currency: string;
+  method: "card" | "cash" | "online";
+  status: "pending" | "completed" | "failed" | "refunded";
+  transactionId?: string;
   paidAt?: Date;
 }
 
@@ -138,10 +184,25 @@ export interface Booking {
   id: string;
   turfId: string;
   userId: string;
-  date: Date;
+  date: string; // ISO string for Redux state
   timeSlot: TimeSlot;
   status: BookingStatus;
   payment: PaymentInfo;
+  totalAmount: number;
+  notes?: string;
+  createdAt: string; // ISO string for Redux state
+  updatedAt: string; // ISO string for Redux state
+}
+
+// API Booking interface with Date objects
+export interface ApiBooking {
+  id: string;
+  turfId: string;
+  userId: string;
+  date: Date;
+  timeSlot: TimeSlot;
+  status: BookingStatus;
+  payment: ApiPaymentInfo;
   totalAmount: number;
   notes?: string;
   createdAt: Date;
@@ -218,6 +279,17 @@ export interface RootState {
   turf: TurfState;
   user: UserState;
   admin: AdminState;
+  adminBooking: {
+    bookings: any[];
+    selectedBooking: any | null;
+    isLoading: boolean;
+    error: string | null;
+    filters: any;
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 // User State (separate from auth for profile management)
@@ -262,7 +334,7 @@ export interface RegisterForm {
 
 export interface BookingForm {
   turfId: string;
-  date: Date;
+  date: string; // ISO string for Redux state
   timeSlot: TimeSlot;
   notes?: string;
 }

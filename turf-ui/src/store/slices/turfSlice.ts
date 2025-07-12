@@ -58,30 +58,30 @@ const mockTurfs: Turf[] = [
         slots: [
           {
             startTime: "06:00",
+            endTime: "07:00",
+            isAvailable: true,
+            price: 2200,
+          },
+          {
+            startTime: "07:00",
             endTime: "08:00",
             isAvailable: true,
-            price: 2500,
+            price: 2200,
           },
           {
-            startTime: "08:00",
-            endTime: "10:00",
-            isAvailable: true,
-            price: 2500,
-          },
-          {
-            startTime: "16:00",
+            startTime: "17:00",
             endTime: "18:00",
             isAvailable: true,
-            price: 2500,
+            price: 2200,
           },
         ],
       },
     ],
-    rating: 4.8,
-    reviewCount: 25,
+    rating: 4.9,
+    reviewCount: 42,
     vendorId: "3",
-    createdAt: new Date("2024-01-15"),
-    updatedAt: new Date("2024-01-15"),
+    createdAt: "2024-01-05T00:00:00.000Z",
+    updatedAt: "2024-01-05T00:00:00.000Z",
   },
   {
     id: "2",
@@ -159,8 +159,8 @@ const mockTurfs: Turf[] = [
     rating: 4.4,
     reviewCount: 32,
     vendorId: "3",
-    createdAt: new Date("2024-01-10"),
-    updatedAt: new Date("2024-01-10"),
+    createdAt: new Date("2024-01-10").toISOString(),
+    updatedAt: new Date("2024-01-10").toISOString(),
   },
   {
     id: "3",
@@ -237,8 +237,8 @@ const mockTurfs: Turf[] = [
     rating: 4.7,
     reviewCount: 18,
     vendorId: "3",
-    createdAt: new Date("2024-01-20"),
-    updatedAt: new Date("2024-01-20"),
+    createdAt: new Date("2024-01-20").toISOString(),
+    updatedAt: new Date("2024-01-20").toISOString(),
   },
   {
     id: "4",
@@ -316,8 +316,8 @@ const mockTurfs: Turf[] = [
     rating: 4.6,
     reviewCount: 28,
     vendorId: "3",
-    createdAt: new Date("2024-01-12"),
-    updatedAt: new Date("2024-01-12"),
+    createdAt: new Date("2024-01-12").toISOString(),
+    updatedAt: new Date("2024-01-12").toISOString(),
   },
   {
     id: "5",
@@ -394,8 +394,8 @@ const mockTurfs: Turf[] = [
     rating: 4.3,
     reviewCount: 15,
     vendorId: "3",
-    createdAt: new Date("2024-01-08"),
-    updatedAt: new Date("2024-01-08"),
+    createdAt: new Date("2024-01-08").toISOString(),
+    updatedAt: new Date("2024-01-08").toISOString(),
   },
   {
     id: "6",
@@ -473,8 +473,8 @@ const mockTurfs: Turf[] = [
     rating: 4.9,
     reviewCount: 42,
     vendorId: "3",
-    createdAt: new Date("2024-01-05"),
-    updatedAt: new Date("2024-01-05"),
+    createdAt: new Date("2024-01-05").toISOString(),
+    updatedAt: new Date("2024-01-05").toISOString(),
   },
 ];
 
@@ -521,15 +521,27 @@ export const createTurf = createAsyncThunk(
       // Simulate API call delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
       
-      // Create new turf with generated ID
+      // Map form data to Turf interface structure
       const newTurf = {
         id: Date.now().toString(),
-        ...turfData,
+        name: turfData.name,
+        description: turfData.description,
+        category: turfData.sportType || turfData.category, // Handle both sportType and category
+        location: {
+          address: turfData.addressLine1 || turfData.location?.address || "",
+          city: turfData.city || turfData.location?.city || "",
+          state: turfData.state || turfData.location?.state || "",
+          zipCode: turfData.postalCode || turfData.location?.zipCode || "",
+        },
+        pricing: {
+          hourlyRate: turfData.pricePerSlot || turfData.pricing?.hourlyRate || 0,
+          currency: turfData.currency || "INR",
+        },
         rating: 0,
         reviewCount: 0,
         vendorId: "1", // Mock vendor ID
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         images: ["https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=New+Turf"],
         amenities: [],
         availability: []
@@ -558,10 +570,25 @@ export const updateTurf = createAsyncThunk(
         throw new Error("Turf not found");
       }
       
+      // Map form data to Turf interface structure
       const updatedTurf = {
         ...existingTurf,
-        ...turfData,
-        updatedAt: new Date()
+        name: turfData.name || existingTurf.name,
+        description: turfData.description || existingTurf.description,
+        category: turfData.sportType || turfData.category || existingTurf.category,
+        location: {
+          ...existingTurf.location,
+          address: turfData.addressLine1 || turfData.location?.address || existingTurf.location.address,
+          city: turfData.city || turfData.location?.city || existingTurf.location.city,
+          state: turfData.state || turfData.location?.state || existingTurf.location.state,
+          zipCode: turfData.postalCode || turfData.location?.zipCode || existingTurf.location.zipCode,
+        },
+        pricing: {
+          ...existingTurf.pricing,
+          hourlyRate: turfData.pricePerSlot || turfData.pricing?.hourlyRate || existingTurf.pricing.hourlyRate,
+          currency: turfData.currency || existingTurf.pricing.currency,
+        },
+        updatedAt: new Date().toISOString()
       };
       
       return updatedTurf;

@@ -362,7 +362,7 @@ const RegisterPage = () => {
               style={{ color: "white", fontWeight: "bold" }}
             />
             {/* OTP Field */}
-            <div className="space-y-2">
+            <div className="space-y-2 mt-2">
               <label
                 htmlFor="otp"
                 className="block text-sm font-medium text-gray-700"
@@ -398,18 +398,6 @@ const RegisterPage = () => {
               disabled={isLoading || !isOtpComplete()}
               style={{ color: "white", fontWeight: "bold" }}
             />
-            {/* Demo Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start">
-                <i className="pi pi-info-circle text-blue-600 mt-0.5 mr-2"></i>
-                <div className="text-sm text-blue-800">
-                  <p className="font-medium mb-1">Demo Mode</p>
-                  <p>
-                    OTP service is mocked. Any 6-digit number will work for OTP.
-                  </p>
-                </div>
-              </div>
-            </div>
             {/* Sign In Link */}
             <div className="text-center">
               <p className="text-sm text-gray-600">

@@ -10,6 +10,7 @@ import turfReducer from './slices/turfSlice';
 import bookingReducer from './slices/bookingSlice';
 import userReducer from './slices/userSlice';
 import adminReducer from './slices/adminSlice';
+import adminBookingReducer from './slices/adminBookingSlice';
 
 // Persist configuration
 const persistConfig = {
@@ -26,6 +27,7 @@ const rootReducer = combineReducers({
   booking: bookingReducer,
   user: userReducer,
   admin: adminReducer,
+  adminBooking: adminBookingReducer,
 });
 
 // Create persisted reducer
@@ -38,14 +40,14 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+        // Ignore Date objects in state since we now store them as ISO strings
+        ignoredPaths: ['turf.turfs', 'booking.bookings', 'user.profile', 'auth.user'],
       },
     }),
   devTools: import.meta.env.DEV,
 });
 
-// Create persistor
 export const persistor = persistStore(store);
 
-// Export types
 export type AppDispatch = typeof store.dispatch;
 export type AppState = RootState; 

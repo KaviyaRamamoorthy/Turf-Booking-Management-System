@@ -12,9 +12,10 @@ import type { AppDispatch } from "../../store";
 interface TurfManagementPageProps {
   onEditTurf?: (turf: Turf) => void;
   onAddTurf?: () => void;
+  onDeleteTurf?: (turf: Turf) => void;
 }
 
-const TurfManagementPage: React.FC<TurfManagementPageProps> = ({ onEditTurf, onAddTurf }) => {
+const TurfManagementPage: React.FC<TurfManagementPageProps> = ({ onEditTurf, onAddTurf, onDeleteTurf }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { turfs, isLoading, error } = useSelector(
     (state: RootState) => state.turf
@@ -43,7 +44,7 @@ const TurfManagementPage: React.FC<TurfManagementPageProps> = ({ onEditTurf, onA
   return (
     <div className="space-y-6">
       <TurfManagementHeader onAddTurf={onAddTurf} />
-      <TurfManagementList turfs={turfs} onEditTurf={onEditTurf} />
+      <TurfManagementList turfs={turfs} onEditTurf={onEditTurf} onDeleteTurf={onDeleteTurf} />
     </div>
   );
 };

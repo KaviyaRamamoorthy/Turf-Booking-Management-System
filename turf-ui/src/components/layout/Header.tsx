@@ -90,7 +90,7 @@ const Header: React.FC = () => {
                   <button
                     key={item.id}
                     onClick={() => handleUserMenuClick(item)}
-                    className="flex items-center whitespace-nowrap gap-1.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex items-center whitespace-nowrap gap-1.5 px-4 py-2 text-sm text-gray-700 w-full hover:!bg-green-100"
                   >
                     <i className={`${item.icon}`}></i>
                     <p>{item.label}</p>

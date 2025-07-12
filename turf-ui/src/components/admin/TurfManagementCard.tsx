@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Badge } from "primereact/badge";
 import { Rating } from "primereact/rating";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { openModal } from "../../store/slices/uiSlice";
 import { deleteTurf } from "../../store/slices/turfSlice";
 import { addToast } from "../../store/slices/uiSlice";
@@ -15,9 +14,10 @@ import type { AppDispatch } from "../../store";
 interface TurfManagementCardProps {
     turf: Turf;
     onEditTurf?: (turf: Turf) => void;
+    onDeleteTurf?: (turf: Turf) => void;
 }
 
-const TurfManagementCard: React.FC<TurfManagementCardProps> = ({ turf, onEditTurf }) => {
+const TurfManagementCard: React.FC<TurfManagementCardProps> = ({ turf, onEditTurf, onDeleteTurf }) => {
     const dispatch = useDispatch<AppDispatch>();
 
     const getCategoryColor = (category: string | undefined) => {
@@ -55,34 +55,31 @@ const TurfManagementCard: React.FC<TurfManagementCardProps> = ({ turf, onEditTur
     };
 
     const handleDelete = () => {
-        confirmDialog({
-            message: `Are you sure you want to delete "${turf.name}"?`,
-            header: "Delete Confirmation",
-            icon: "pi pi-exclamation-triangle",
-            acceptClassName: "p-button-danger",
-            accept: () => {
-                dispatch(deleteTurf(turf.id))
-                    .unwrap()
-                    .then(() => {
-                        dispatch(
-                            addToast({
-                                type: "success",
-                                title: "Success",
-                                message: "Turf deleted successfully",
-                            })
-                        );
-                    })
-                    .catch((error) => {
-                        dispatch(
-                            addToast({
-                                type: "error",
-                                title: "Error",
-                                message: error || "Failed to delete turf",
-                            })
-                        );
-                    });
-            },
-        });
+        if (onDeleteTurf) {
+            onDeleteTurf(turf);
+        } else {
+            // Fallback to direct deletion without confirmation
+            dispatch(deleteTurf(turf.id))
+                .unwrap()
+                .then(() => {
+                    dispatch(
+                        addToast({
+                            type: "success",
+                            title: "Success",
+                            message: "Turf deleted successfully",
+                        })
+                    );
+                })
+                .catch((error) => {
+                    dispatch(
+                        addToast({
+                            type: "error",
+                            title: "Error",
+                            message: error || "Failed to delete turf",
+                        })
+                    );
+                });
+        }
     };
 
     const header = (
@@ -170,7 +167,6 @@ const TurfManagementCard: React.FC<TurfManagementCardProps> = ({ turf, onEditTur
                     </div>
                 </div>
             </Card>
-            <ConfirmDialog />
         </>
     );
 };

@@ -319,6 +319,7 @@ const MyBookingsPage: React.FC = () => {
         style={{ width: "50vw", maxWidth: "600px" }}
         onHide={() => setShowDetailsModal(false)}
         modal
+        closeIcon="pi pi-times close-button"
       >
         {selectedBooking && (
           <div className="space-y-4">

@@ -2,6 +2,7 @@ package com.turf.dto;
 
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.List;
 
 /**
  * Data Transfer Object for User entity.
@@ -20,6 +21,9 @@ public class UserDto {
     private String location;
     private boolean isVerified;
     private boolean isActive;
+    private List<RoleDto> roles;
+    private String role;
+    private String vendorApprovalStatus;
     // Getters and setters omitted for brevity
 
     public UUID getId() { return id; }
@@ -44,6 +48,12 @@ public class UserDto {
     public void setVerified(boolean isVerified) { this.isVerified = isVerified; }
     public boolean isActive() { return isActive; }
     public void setActive(boolean isActive) { this.isActive = isActive; }
+    public List<RoleDto> getRoles() { return roles; }
+    public void setRoles(List<RoleDto> roles) { this.roles = roles; }
     public String getPasswordHash() { return null; } // Add this if needed for password
     public void setPasswordHash(String passwordHash) { /* implement if needed */ }
-} 
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+    public String getVendorApprovalStatus() { return vendorApprovalStatus; }
+    public void setVendorApprovalStatus(String vendorApprovalStatus) { this.vendorApprovalStatus = vendorApprovalStatus; }
+}

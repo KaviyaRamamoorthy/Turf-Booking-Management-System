@@ -29,7 +29,8 @@ This document explains how the backend application works, with step-by-step usag
   "doorNo": "1A",
   "street": "Main St",
   "locality": "Central",
-  "location": "City"
+  "location": "City",
+  "role": "CUSTOMER"
 }
 ```
 - **Response:** 200 OK, message about OTP sent.

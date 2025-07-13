@@ -38,6 +38,7 @@ public class UserController {
         String email = authentication.getName();
         UserDto user = userService.getUserByEmail(email);
         if (user == null) throw new ResourceNotFoundException(CommonConstants.MSG_USER_NOT_FOUND);
+        user.setRoles(userService.getUserRolesByEmail(email));
         logger.info("Profile fetched for user: {}", email);
         return ResponseEntity.ok(new ApiResponse<>(true, CommonConstants.MSG_SUCCESS, user));
     }
@@ -102,4 +103,28 @@ public class UserController {
         logger.info("Admin deactivated user: {}", id);
         return ResponseEntity.ok(new ApiResponse<>(true, "User deactivated.", null));
     }
-} 
+
+    @PutMapping("/{id}/approve-vendor")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<String>> approveVendor(@PathVariable UUID id) {
+        UserDto user = userService.getUserById(id);
+        if (user == null) throw new ResourceNotFoundException(CommonConstants.MSG_USER_NOT_FOUND);
+        user.setVendorApprovalStatus("APPROVED");
+        user.setActive(true);
+        userService.updateUser(id, user);
+        logger.info("Admin approved vendor: {}", id);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Vendor approved.", null));
+    }
+
+    @PutMapping("/{id}/reject-vendor")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<String>> rejectVendor(@PathVariable UUID id) {
+        UserDto user = userService.getUserById(id);
+        if (user == null) throw new ResourceNotFoundException(CommonConstants.MSG_USER_NOT_FOUND);
+        user.setVendorApprovalStatus("REJECTED");
+        user.setActive(false);
+        userService.updateUser(id, user);
+        logger.info("Admin rejected vendor: {}", id);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Vendor rejected.", null));
+    }
+}

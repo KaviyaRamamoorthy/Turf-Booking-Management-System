@@ -22,7 +22,8 @@ Below is a list of API endpoints as defined in the Postman collection, including
   "doorNo": "1A",
   "street": "Main St",
   "locality": "Central",
-  "location": "City"
+  "location": "City",
+  "role": "CUSTOMER"
 }
 ```
 

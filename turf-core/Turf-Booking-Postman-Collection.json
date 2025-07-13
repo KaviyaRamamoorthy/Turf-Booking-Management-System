@@ -15,7 +15,7 @@
         "url": { "raw": "http://localhost:8080/api/auth/register", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["api", "auth", "register"] },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"fullName\": \"Test User\",\n  \"email\": \"testuser@example.com\",\n  \"passwordHash\": \"password123\",\n  \"phoneNumber\": \"1234567890\",\n  \"dob\": \"1990-01-01\",\n  \"doorNo\": \"1A\",\n  \"street\": \"Main St\",\n  \"locality\": \"Central\",\n  \"location\": \"City\"\n}"
+          "raw": "{\n  \"fullName\": \"Test User\",\n  \"email\": \"testuser@example.com\",\n  \"passwordHash\": \"password123\",\n  \"phoneNumber\": \"1234567890\",\n  \"dob\": \"1990-01-01\",\n  \"doorNo\": \"1A\",\n  \"street\": \"Main St\",\n  \"locality\": \"Central\",\n  \"location\": \"City\",\n  \"role\": \"CUSTOMER\"\n}"
         }
       }
     },

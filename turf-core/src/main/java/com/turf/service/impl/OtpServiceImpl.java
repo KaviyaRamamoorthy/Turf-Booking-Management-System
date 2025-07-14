@@ -9,6 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.security.SecureRandom;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Implementation of OtpService using in-memory ConcurrentHashMap for OTP storage and expiry.
@@ -19,6 +23,9 @@ import java.security.SecureRandom;
 public class OtpServiceImpl implements OtpService {
     private static final Logger logger = LoggerFactory.getLogger(OtpServiceImpl.class);
     private static final SecureRandom random = new SecureRandom();
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     private static class OtpEntry {
         String otp;
@@ -37,7 +44,18 @@ public class OtpServiceImpl implements OtpService {
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(CommonConstants.OTP_EXPIRY_MINUTES);
         otpStore.put(getKey(email, purpose), new OtpEntry(otp, expiry));
         logger.info("Generated OTP for {} (purpose: {}), expires at {}", email, purpose, expiry);
-        // In real app, send OTP via email here
+        // Send OTP email
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setTo(email);
+            helper.setSubject("Your OTP Code");
+            helper.setText("Your OTP is: " + otp + ". It will expire in " + CommonConstants.OTP_EXPIRY_MINUTES + " minutes.");
+            mailSender.send(message);
+            logger.info("OTP email sent to {}", email);
+        } catch (Exception e) {
+            logger.error("Failed to send OTP email to {}", email, e);
+        }
     }
 
     @Override

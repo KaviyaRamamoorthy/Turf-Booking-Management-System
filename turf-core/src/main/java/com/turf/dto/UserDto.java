@@ -24,6 +24,7 @@ public class UserDto {
     private List<RoleDto> roles;
     private String role;
     private String vendorApprovalStatus;
+    private String passwordHash;
     // Getters and setters omitted for brevity
 
     public UUID getId() { return id; }
@@ -50,8 +51,8 @@ public class UserDto {
     public void setActive(boolean isActive) { this.isActive = isActive; }
     public List<RoleDto> getRoles() { return roles; }
     public void setRoles(List<RoleDto> roles) { this.roles = roles; }
-    public String getPasswordHash() { return null; } // Add this if needed for password
-    public void setPasswordHash(String passwordHash) { /* implement if needed */ }
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
     public String getVendorApprovalStatus() { return vendorApprovalStatus; }

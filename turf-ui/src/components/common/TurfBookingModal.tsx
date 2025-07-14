@@ -1,13 +1,10 @@
-import React, { useState } from "react";
-import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
-import { Badge } from "primereact/badge";
-import { Card } from "primereact/card";
+import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
-import { ProgressSpinner } from "primereact/progressspinner";
-import type { Turf } from "../../types";
+import React, { useState } from "react";
 import { bookingService } from "../../services/bookingService";
+import type { Turf } from "../../types";
 import "./TurfBookingModal.css";
 
 interface TurfBookingModalProps {

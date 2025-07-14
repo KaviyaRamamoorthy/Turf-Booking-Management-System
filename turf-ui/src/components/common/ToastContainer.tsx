@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import { Toast } from "primereact/toast";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch } from "../../store";
 import { removeToast } from "../../store/slices/uiSlice";
 import type { RootState } from "../../types";
-import type { AppDispatch } from "../../store";
 
 const ToastContainer: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

@@ -7,7 +7,6 @@ import { Column } from "primereact/column";
 import type { RootState } from "../../types";
 import type { AppDispatch } from "../../store";
 import { fetchAdminStats } from "../../store/slices/adminSlice";
-import RoleSwitcher from "../../components/common/RoleSwitcher";
 
 const AdminDashboard: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -99,8 +98,7 @@ const AdminDashboard: React.FC = () => {
             {stats?.totalBookings || 0}
           </div>
           <div className="text-gray-600">Total Bookings</div>
-          <div className="text-sm text-green-600 mt-2">
-            <i className="pi pi-arrow-up mr-1"></i>
+          <div className="text-sm text-green-600 mt-2"><i className="pi pi-arrow-up mr-1"></i>
             +8% from last month
           </div>
         </Card>

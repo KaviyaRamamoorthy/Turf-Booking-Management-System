@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
-import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
-import { Button } from "primereact/button";
-import { closeModal } from "../../store/slices/uiSlice";
-import { createTurf, updateTurf } from "../../store/slices/turfSlice";
-import { addToast } from "../../store/slices/uiSlice";
-import type { Turf, TurfCategory, TurfFormData } from "../../types";
-import type { RootState } from "../../types";
+import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../store";
+import { createTurf, updateTurf } from "../../store/slices/turfSlice";
+import { addToast, closeModal } from "../../store/slices/uiSlice";
+import type { RootState, Turf, TurfFormData } from "../../types";
 
 interface TurfFormModalProps {
   visible: boolean;

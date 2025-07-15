@@ -7,69 +7,26 @@ import type {
   RegisterForm,
   UserRole,
 } from "../../types";
-
-// Mock authentication service
-const mockUsers: User[] = [
-  {
-    id: "1",
-    email: "admin@turf.com",
-    name: "Admin User",
-    phone: "+1234567890",
-    role: "admin",
-    preferences: {
-      theme: "light",
-      language: "en",
-      notifications: true,
-    },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    email: "customer@turf.com",
-    name: "John Customer",
-    phone: "+1234567891",
-    role: "customer",
-    preferences: {
-      theme: "light",
-      language: "en",
-      notifications: true,
-    },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    email: "vendor@turf.com",
-    name: "Sarah Vendor",
-    phone: "+1234567892",
-    role: "vendor",
-    preferences: {
-      theme: "light",
-      language: "en",
-      notifications: true,
-    },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+import { authService } from "../../services/authService";
+import { localStorageUtil } from "../../utils/localStorage";
 
 // Async thunks
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (credentials: LoginForm & { role?: UserRole }, { rejectWithValue }) => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // For development: any email/password combination works
-      // Create a user with the provided email and default admin role
-      const user: User = {
-        id: Date.now().toString(),
+      const response = await authService.login({
         email: credentials.email,
-        name: credentials.email.split("@")[0], // Use email prefix as name
-        phone: "+1234567890",
-        role: "admin", // Default to admin role
+        password: credentials.password,
+      });
+
+      // Convert API response to User type
+      const user: User = {
+        id: response.user.id,
+        email: response.user.email,
+        name: response.user.name,
+        phone: response.user.phone || "",
+        role: response.user.role as UserRole,
         preferences: {
           theme: "light",
           language: "en",
@@ -79,10 +36,7 @@ export const loginUser = createAsyncThunk(
         updatedAt: new Date().toISOString(),
       };
 
-      // Mock token generation
-      const token = `mock-jwt-token-${user.id}-${Date.now()}`;
-
-      return { user, token };
+      return { user, token: response.token };
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Login failed"
@@ -100,36 +54,21 @@ export const registerUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Check if user already exists
-      const existingUser = mockUsers.find((u) => u.email === userData.email);
-      if (existingUser) {
-        throw new Error("User with this email already exists");
-      }
-
-      // Create new user
-      const newUser: User = {
-        id: (mockUsers.length + 1).toString(),
-        email: userData.email,
+      const response = await authService.register({
         name: userData.name,
+        email: userData.email,
         phone: userData.phone,
+        password: userData.password,
         role: userData.role,
-        address: userData.address,
-        preferences: {
-          theme: "light",
-          language: "en",
-          notifications: true,
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+      });
+
+      // For registration, we might need to handle OTP verification
+      // For now, return a success message
+      return {
+        user: null,
+        token: null,
+        message: response.message
       };
-
-      // Mock token generation
-      const token = `mock-jwt-token-${newUser.id}-${Date.now()}`;
-
-      return { user: newUser, token };
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Registration failed"
@@ -142,10 +81,7 @@ export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // In a real app, you would call the logout API endpoint
+      await authService.logout();
       return true;
     } catch (error) {
       return rejectWithValue(
@@ -159,13 +95,30 @@ export const getCurrentUser = createAsyncThunk(
   "auth/getCurrentUser",
   async (_, { rejectWithValue }) => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Check if user is authenticated
+      if (!authService.isAuthenticated()) {
+        throw new Error("User not authenticated");
+      }
 
-      // In a real app, you would validate the token and get user data
-      // For now, return the first admin user as default
-      const user = mockUsers[0];
-      const token = `mock-jwt-token-${user.id}-${Date.now()}`;
+      const userData = await authService.getCurrentUser();
+
+      // Convert API response to User type
+      const user: User = {
+        id: userData.id,
+        email: userData.email,
+        name: userData.name,
+        phone: userData.phone || "+1234567890",
+        role: userData.role as UserRole,
+        preferences: {
+          theme: "light",
+          language: "en",
+          notifications: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      const token = authService.getToken();
 
       return { user, token };
     } catch (error) {
@@ -217,6 +170,15 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.isAuthenticated = true;
         state.error = null;
+        
+        // Store token and user data in localStorage
+        localStorageUtil.setToken(action.payload.token);
+        localStorageUtil.setUserData({
+          id: action.payload.user.id,
+          email: action.payload.user.email,
+          name: action.payload.user.name,
+          role: action.payload.user.role,
+        });
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -234,6 +196,17 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.isAuthenticated = true;
         state.error = null;
+
+        // Store token and user data in localStorage if available
+        if (action.payload.token && action.payload.user) {
+          localStorageUtil.setToken(action.payload.token);
+          localStorageUtil.setUserData({
+            id: action.payload.user.id,
+            email: action.payload.user.email,
+            name: action.payload.user.name,
+            role: action.payload.user.role,
+          });
+        }
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -250,10 +223,14 @@ const authSlice = createSlice({
         state.token = null;
         state.isAuthenticated = false;
         state.error = null;
+        // Clear localStorage
+        localStorageUtil.clearAuthData();
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+        // Clear localStorage even on error
+        localStorageUtil.clearAuthData();
       })
 
       // Get current user
@@ -267,6 +244,15 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.isAuthenticated = true;
         state.error = null;
+
+        // Store token and user data in localStorage
+        localStorageUtil.setToken(action.payload.token);
+        localStorageUtil.setUserData({
+          id: action.payload.user.id,
+          email: action.payload.user.email,
+          name: action.payload.user.name,
+          role: action.payload.user.role,
+        });
       })
       .addCase(getCurrentUser.rejected, (state, action) => {
         state.isLoading = false;

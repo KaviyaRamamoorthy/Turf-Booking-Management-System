@@ -58,12 +58,9 @@ const LoginPage = () => {
     }
 
     try {
-      // For development: any email/password combination works
-      // Set role as admin by default
       const loginCredentials = {
         email: formData.email,
         password: formData.password,
-        role: "admin" as const,
       };
 
       await dispatch(loginUser(loginCredentials)).unwrap();

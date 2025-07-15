@@ -1,7 +1,5 @@
 import type { ApiResponse } from "../types";
-
-// Base API URL
-const API_BASE_URL = "/api/v1";
+import { apiPost, apiGet, apiPut, apiDelete } from "../utils/apiInterceptor";
 
 // Booking interfaces
 export interface BookingRequest {
@@ -35,62 +33,14 @@ export interface BookingListResponse {
 }
 
 class BookingService {
-  private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem("authToken");
-    return {
-      "Content-Type": "application/json",
-      Authorization: token ? `Bearer ${token}` : "",
-    };
-  }
 
   // Create booking
   async createBooking(
     bookingData: BookingRequest
   ): Promise<ApiResponse<BookingResponse>> {
     try {
-      // For now, simulate API call with sample response
-      // In production, uncomment the actual API call below
-
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Sample success response based on api-implementation.md
-      const sampleResponse: ApiResponse<BookingResponse> = {
-        success: true,
-        message: "Booking created successfully",
-        data: {
-          id: `booking_${Date.now()}`,
-          turfId: bookingData.turfId,
-          customerId: "user_123",
-          bookingDate: bookingData.bookingDate,
-          startTime: bookingData.startTime,
-          endTime: bookingData.endTime,
-          totalAmount: 1500, // Sample amount
-          status: "confirmed",
-          turfName: "Premium Football Ground",
-          turfLocation: "Bangalore, Karnataka",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      };
-
-      return sampleResponse;
-
-      /* 
-      // Actual API call (uncomment when backend is ready)
-      const response = await fetch(`${API_BASE_URL}/bookings`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(bookingData),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result: ApiResponse<BookingResponse> = await response.json();
-      return result;
-      */
+      const response: ApiResponse<BookingResponse> = await apiPost<ApiResponse<BookingResponse>>('/bookings', bookingData);
+      return response;
     } catch (error) {
       console.error("Create booking error:", error);
       return {
@@ -117,52 +67,9 @@ class BookingService {
       if (params?.page) queryParams.append("page", params.page.toString());
       if (params?.limit) queryParams.append("limit", params.limit.toString());
 
-      // Sample response for now
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const sampleResponse: ApiResponse<BookingListResponse> = {
-        success: true,
-        message: "Bookings retrieved successfully",
-        data: {
-          bookings: [
-            {
-              id: "booking_1",
-              turfId: "turf_1",
-              customerId: "user_123",
-              bookingDate: "2024-01-15",
-              startTime: "14:00",
-              endTime: "15:00",
-              totalAmount: 1500,
-              status: "confirmed",
-              turfName: "Premium Football Ground",
-              turfLocation: "Bangalore, Karnataka",
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-          ],
-          total: 1,
-          page: 1,
-          limit: 20,
-          totalPages: 1,
-        },
-      };
-
-      return sampleResponse;
-
-      /* 
-      // Actual API call (uncomment when backend is ready)
-      const response = await fetch(`${API_BASE_URL}/bookings?${queryParams}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result: ApiResponse<BookingListResponse> = await response.json();
-      return result;
-      */
+      const url = `/bookings${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      const response: ApiResponse<BookingListResponse> = await apiGet<ApiResponse<BookingListResponse>>(url);
+      return response;
     } catch (error) {
       console.error("Get bookings error:", error);
       return {
@@ -178,44 +85,8 @@ class BookingService {
     bookingId: string
   ): Promise<ApiResponse<BookingResponse>> {
     try {
-      // Sample response for now
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const sampleResponse: ApiResponse<BookingResponse> = {
-        success: true,
-        message: "Booking details retrieved successfully",
-        data: {
-          id: bookingId,
-          turfId: "turf_1",
-          customerId: "user_123",
-          bookingDate: "2024-01-15",
-          startTime: "14:00",
-          endTime: "15:00",
-          totalAmount: 1500,
-          status: "confirmed",
-          turfName: "Premium Football Ground",
-          turfLocation: "Bangalore, Karnataka",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      };
-
-      return sampleResponse;
-
-      /* 
-      // Actual API call (uncomment when backend is ready)
-      const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result: ApiResponse<BookingResponse> = await response.json();
-      return result;
-      */
+      const response: ApiResponse<BookingResponse> = await apiGet<ApiResponse<BookingResponse>>(`/bookings/${bookingId}`);
+      return response;
     } catch (error) {
       console.error("Get booking details error:", error);
       return {
@@ -231,44 +102,8 @@ class BookingService {
     bookingId: string
   ): Promise<ApiResponse<BookingResponse>> {
     try {
-      // Sample response for now
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const sampleResponse: ApiResponse<BookingResponse> = {
-        success: true,
-        message: "Booking cancelled successfully",
-        data: {
-          id: bookingId,
-          turfId: "turf_1",
-          customerId: "user_123",
-          bookingDate: "2024-01-15",
-          startTime: "14:00",
-          endTime: "15:00",
-          totalAmount: 1500,
-          status: "cancelled",
-          turfName: "Premium Football Ground",
-          turfLocation: "Bangalore, Karnataka",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      };
-
-      return sampleResponse;
-
-      /* 
-      // Actual API call (uncomment when backend is ready)
-      const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/cancel`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result: ApiResponse<BookingResponse> = await response.json();
-      return result;
-      */
+      const response: ApiResponse<BookingResponse> = await apiPut<ApiResponse<BookingResponse>>(`/bookings/${bookingId}/cancel`);
+      return response;
     } catch (error) {
       console.error("Cancel booking error:", error);
       return {

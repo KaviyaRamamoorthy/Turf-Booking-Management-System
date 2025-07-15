@@ -9,6 +9,7 @@ import {
 import { PersistGate } from "redux-persist/integration/react";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import AppLayout from "./components/layout/AppLayout";
+import AuthInitializer from "./components/common/AuthInitializer";
 import { persistor, store } from "./store";
 
 // Import PrimeReact CSS
@@ -54,8 +55,9 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <Router>
-          <Routes>
+        <AuthInitializer>
+          <Router>
+            <Routes>
             {/* Public Routes - No Layout */}
             <Route path="/" element={<Navigate to="/auth/login" replace />} />
             <Route path="/auth/login" element={<LoginPage />} />
@@ -188,6 +190,7 @@ const App: React.FC = () => {
             />
           </Routes>
         </Router>
+        </AuthInitializer>
       </PersistGate>
     </Provider>
   );

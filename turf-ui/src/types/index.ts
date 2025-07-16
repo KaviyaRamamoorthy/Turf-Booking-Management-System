@@ -279,6 +279,7 @@ export interface RootState {
   turf: TurfState;
   user: UserState;
   admin: AdminState;
+  category: CategoryState;
   adminBooking: {
     bookings: any[];
     selectedBooking: any | null;
@@ -354,7 +355,7 @@ export interface ProfileForm {
 export interface TurfFormData {
   name: string;
   description: string;
-  category: TurfCategory;
+  category: string; // Category ID from backend
   location: {
     address: string;
     city: string;
@@ -407,4 +408,17 @@ export interface BreadcrumbItem {
   label: string;
   path: string;
   isActive: boolean;
+}
+
+// Category Types
+export interface Category {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface CategoryState {
+  categories: Category[];
+  isLoading: boolean;
+  error: string | null;
 }

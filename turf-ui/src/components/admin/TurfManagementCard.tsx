@@ -145,7 +145,7 @@ const TurfManagementCard: React.FC<TurfManagementCardProps> = ({ turf, onEditTur
                     <div className="flex items-center text-sm text-gray-600">
                         <i className="pi pi-map-marker mr-1"></i>
                         <span>
-                            {turf.location.city}, {turf.location.state}
+                            {turf.location.address}.
                         </span>
                     </div>
 

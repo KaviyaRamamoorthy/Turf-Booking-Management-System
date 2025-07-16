@@ -1,22 +1,20 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
-import { ProgressSpinner } from "primereact/progressspinner";
+import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
-import {
-  fetchTurfs,
-  setFilters,
-  clearFilters,
-} from "../store/slices/turfSlice";
+import { ProgressSpinner } from "primereact/progressspinner";
+import React, { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import BookingSuccessModal from "../components/common/BookingSuccessModal";
+import TurfBookingModal from "../components/common/TurfBookingModal";
 import TurfCard from "../components/common/TurfCard";
 import TurfDetailsModal from "../components/common/TurfDetailsModal";
-import TurfBookingModal from "../components/common/TurfBookingModal";
-import BookingSuccessModal from "../components/common/BookingSuccessModal";
-import type { RootState, Turf } from "../types";
 import type { AppDispatch } from "../store";
-import type { TurfCategory } from "../types";
+import {
+  clearFilters,
+  fetchTurfs
+} from "../store/slices/turfSlice";
+import type { RootState, Turf } from "../types";
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -59,7 +57,7 @@ const HomePage: React.FC = () => {
 
   // Load turfs on component mount
   useEffect(() => {
-    dispatch(fetchTurfs());
+    dispatch(fetchTurfs({}));
   }, [dispatch]);
 
   // Filter and sort turfs

@@ -1,7 +1,9 @@
 package com.turf.service.impl;
 
-import com.turf.entity.User;
-import com.turf.repository.UserRepository;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +13,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
+
+import com.turf.entity.User;
+import com.turf.repository.UserRepository;
 
 /**
  * CustomUserDetailsService loads users from the database for Spring Security authentication.
@@ -31,9 +34,28 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
         logger.info("Loaded user for authentication: {}", email);
+        
         List<GrantedAuthority> authorities = new ArrayList<>();
-        // For now, no roles loaded. Add role loading logic if needed.
+        
+        // Load user roles and convert to authorities
+        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+            authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+                .collect(Collectors.toList());
+            logger.info("Loaded {} roles for user {}", authorities.size(), email);
+        } else {
+            // Default role if no roles assigned
+            authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+            logger.info("No roles found for user {}, assigned default ROLE_CUSTOMER", email);
+        }
+        
         return new org.springframework.security.core.userdetails.User(
-                user.getEmail(), user.getPasswordHash(), user.isActive(), true, true, true, authorities);
+                user.getEmail(), 
+                user.getPasswordHash(), 
+                user.isActive(), 
+                true, 
+                true, 
+                true, 
+                authorities);
     }
 } 

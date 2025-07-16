@@ -26,11 +26,12 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { isLoading } = useSelector((state: RootState) => state.turf);
+  const { categories } = useSelector((state: RootState) => state.category);
 
   const [formData, setFormData] = useState<TurfFormData>({
     name: "",
     description: "",
-    category: "football",
+    category: "", // Will be set to first category ID when categories load
     location: {
       address: "",
       city: "",
@@ -49,14 +50,11 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Category options
-  const categoryOptions = [
-    { label: "Football", value: "football" },
-    { label: "Cricket", value: "cricket" },
-    { label: "Tennis", value: "tennis" },
-    { label: "Basketball", value: "basketball" },
-    { label: "Volleyball", value: "volleyball" },
-  ];
+  // Category options - dynamic from Redux state
+  const categoryOptions = categories.map(category => ({
+    label: category.name,
+    value: category.id
+  }));
 
   // Slot interval options
   const slotIntervalOptions = [
@@ -99,7 +97,7 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
       setFormData({
         name: "",
         description: "",
-        category: "football",
+        category: "",
         location: {
           address: "",
           city: "",
@@ -118,6 +116,16 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
     }
     setErrors({});
   }, [editMode, turfToEdit, visible]);
+
+  // Set default category when categories are loaded
+  useEffect(() => {
+    if (categories.length > 0 && !editMode && formData.category === "") {
+      setFormData(prev => ({
+        ...prev,
+        category: categories[0].id
+      }));
+    }
+  }, [categories, editMode, formData.category]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};

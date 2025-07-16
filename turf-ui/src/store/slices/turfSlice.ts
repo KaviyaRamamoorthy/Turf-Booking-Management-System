@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { TurfState, Turf, TurfFilters, TurfCategory } from "../../types";
+import type { TurfState, Turf, TurfFilters, TurfCategory, RootState } from "../../types";
+import { turfService } from "../../services/turfService";
 
 // Mock turf data - updated to match API implementation structure
 const mockTurfs: Turf[] = [
@@ -481,11 +482,11 @@ const mockTurfs: Turf[] = [
 // Async thunks
 export const fetchTurfs = createAsyncThunk(
   "turf/fetchTurfs",
-  async (_, { rejectWithValue }) => {
+  async (filters: any = undefined, { rejectWithValue }) => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      return mockTurfs;
+      // Call the real API service
+      const turfs = await turfService.getTurfs(filters);
+      return turfs;
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Failed to fetch turfs"
@@ -498,12 +499,8 @@ export const fetchTurfById = createAsyncThunk(
   "turf/fetchTurfById",
   async (id: string, { rejectWithValue }) => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const turf = mockTurfs.find((t) => t.id === id);
-      if (!turf) {
-        throw new Error("Turf not found");
-      }
+      // Call the real API service
+      const turf = await turfService.getTurfById(id);
       return turf;
     } catch (error) {
       return rejectWithValue(
@@ -518,30 +515,30 @@ export const createTurf = createAsyncThunk(
   "turf/createTurf",
   async (turfData: any, { rejectWithValue }) => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Call the real API service
+      const response = await turfService.createTurf(turfData);
       
-      // Map form data to Turf interface structure
-      const newTurf = {
-        id: Date.now().toString(),
-        name: turfData.name,
-        description: turfData.description,
-        category: turfData.sportType || turfData.category, // Handle both sportType and category
+      // Map the backend response to our frontend Turf structure
+      const newTurf: Turf = {
+        id: response.id || Date.now().toString(),
+        name: response.name,
+        description: response.description,
+        category: response.category || "football", // Default fallback
         location: {
-          address: turfData.addressLine1 || turfData.location?.address || "",
-          city: turfData.city || turfData.location?.city || "",
-          state: turfData.state || turfData.location?.state || "",
-          zipCode: turfData.postalCode || turfData.location?.zipCode || "",
+          address: response.location || "",
+          city: "", // Backend doesn't provide this separately
+          state: "",
+          zipCode: "",
         },
         pricing: {
-          hourlyRate: turfData.pricePerSlot || turfData.pricing?.hourlyRate || 0,
-          currency: turfData.currency || "INR",
+          hourlyRate: response.pricePerHour || 0,
+          currency: "INR",
         },
         rating: 0,
         reviewCount: 0,
-        vendorId: "1", // Mock vendor ID
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        vendorId: response.vendorId || "1",
+        createdAt: response.createdAt || new Date().toISOString(),
+        updatedAt: response.updatedAt || new Date().toISOString(),
         images: ["https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=New+Turf"],
         amenities: [],
         availability: []

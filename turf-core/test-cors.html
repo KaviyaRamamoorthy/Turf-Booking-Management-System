@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test</title>
+</head>
+<body>
+    <h1>CORS Test for Turf Booking Backend</h1>
+    <button onclick="testCors()">Test CORS</button>
+    <button onclick="testHealth()">Test Health</button>
+    <button onclick="testLogin()">Test Login</button>
+    <div id="result"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        
+        async function testCors() {
+            try {
+                const response = await fetch(`${API_BASE}/test/cors`);
+                const data = await response.text();
+                document.getElementById('result').innerHTML = `<p>CORS Test: ${data}</p>`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p style="color: red;">CORS Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function testHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/test/health`);
+                const data = await response.text();
+                document.getElementById('result').innerHTML = `<p>Health Test: ${data}</p>`;
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p style="color: red;">Health Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function testLogin() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@turf.com',
+                        password: 'admin123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('result').innerHTML = `<p>Login Test: Success! Token: ${data.data.substring(0, 20)}...</p>`;
+                } else {
+                    const errorText = await response.text();
+                    document.getElementById('result').innerHTML = `<p style="color: red;">Login Error: ${response.status} - ${errorText}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p style="color: red;">Login Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html> 

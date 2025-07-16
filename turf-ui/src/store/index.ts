@@ -11,12 +11,13 @@ import bookingReducer from './slices/bookingSlice';
 import userReducer from './slices/userSlice';
 import adminReducer from './slices/adminSlice';
 import adminBookingReducer from './slices/adminBookingSlice';
+import categoryReducer from './slices/categorySlice';
 
 // Persist configuration
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth', 'ui'], // Only persist auth and ui state
+  whitelist: ['auth', 'ui', 'category'], // Persist auth, ui, and category state
 };
 
 // Combine reducers
@@ -28,6 +29,7 @@ const rootReducer = combineReducers({
   user: userReducer,
   admin: adminReducer,
   adminBooking: adminBookingReducer,
+  category: categoryReducer,
 });
 
 // Create persisted reducer

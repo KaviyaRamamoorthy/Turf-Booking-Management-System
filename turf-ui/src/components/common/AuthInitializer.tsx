@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCurrentUser } from '../../store/slices/authSlice';
+import { fetchCategories } from '../../store/slices/categorySlice';
 import type { RootState } from '../../types';
 import type { AppDispatch } from '../../store';
 import { localStorageUtil } from '../../utils/localStorage';
@@ -12,6 +13,7 @@ interface AuthInitializerProps {
 const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+  const { categories } = useSelector((state: RootState) => state.category);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -32,6 +34,13 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
 
     initializeAuth();
   }, [dispatch, isAuthenticated]);
+
+  // Fetch categories when user is authenticated and categories are not loaded
+  useEffect(() => {
+    if (isAuthenticated && categories.length === 0) {
+      dispatch(fetchCategories());
+    }
+  }, [dispatch, isAuthenticated, categories.length]);
 
   return <>{children}</>;
 };

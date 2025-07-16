@@ -112,7 +112,7 @@ const TurfCard: React.FC<TurfCardProps> = ({
           <div className="flex items-center text-sm text-gray-600 mb-2">
             <i className="pi pi-map-marker mr-1 text-gray-400"></i>
             <span>
-              {turf.location.city}, {turf.location.state}
+              {turf.location.address}.
             </span>
           </div>
         </div>

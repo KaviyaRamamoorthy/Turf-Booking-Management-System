@@ -1,6 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { TurfState, Turf, TurfFilters, TurfCategory, RootState } from "../../types";
+import type {
+  TurfState,
+  Turf,
+  TurfFilters,
+  TurfCategory,
+  RootState,
+} from "../../types";
 import { turfService } from "../../services/turfService";
 
 // Mock turf data - updated to match API implementation structure
@@ -8,9 +14,8 @@ const mockTurfs: Turf[] = [
   {
     id: "1",
     name: "Green Valley Cricket Ground",
-    description:
-      "Professional cricket ground with excellent drainage system and natural grass surface. Perfect for tournaments and practice sessions.",
-    category: "cricket",
+    vendorId: "3",
+    categoryId: "cricket-1",
     location: {
       address: "Block A, Sports Complex, Sector 18",
       city: "Mumbai",
@@ -18,6 +23,13 @@ const mockTurfs: Turf[] = [
       zipCode: "400703",
       coordinates: { lat: 19.076, lng: 72.8777 },
     },
+    description:
+      "Professional cricket ground with excellent drainage system and natural grass surface. Perfect for tournaments and practice sessions.",
+    pricePerHour: 2500,
+    openTime: "06:00:00",
+    closeTime: "22:00:00",
+    // Legacy/computed fields for UI compatibility
+    category: "cricket",
     pricing: {
       hourlyRate: 2500,
       currency: "INR",
@@ -80,16 +92,14 @@ const mockTurfs: Turf[] = [
     ],
     rating: 4.9,
     reviewCount: 42,
-    vendorId: "3",
     createdAt: "2024-01-05T00:00:00.000Z",
     updatedAt: "2024-01-05T00:00:00.000Z",
   },
   {
     id: "2",
     name: "Champions Football Arena",
-    description:
-      "FIFA standard football field with artificial turf and professional floodlights for evening matches and training.",
-    category: "football",
+    vendorId: "3",
+    categoryId: "football-1",
     location: {
       address: "45, Stadium Road, Bandra West",
       city: "Mumbai",
@@ -97,6 +107,13 @@ const mockTurfs: Turf[] = [
       zipCode: "400050",
       coordinates: { lat: 19.0596, lng: 72.8295 },
     },
+    description:
+      "FIFA standard football field with artificial turf and professional floodlights for evening matches and training.",
+    pricePerHour: 1800,
+    openTime: "06:00:00",
+    closeTime: "22:00:00",
+    // Legacy/computed fields for UI compatibility
+    category: "football",
     pricing: {
       hourlyRate: 1800,
       currency: "INR",
@@ -159,15 +176,20 @@ const mockTurfs: Turf[] = [
     ],
     rating: 4.4,
     reviewCount: 32,
-    vendorId: "3",
     createdAt: new Date("2024-01-10").toISOString(),
     updatedAt: new Date("2024-01-10").toISOString(),
   },
   {
     id: "3",
     name: "SportsPlex Multi-Ground",
+    vendorId: "4",
+    categoryId: "volleyball-1",
     description:
       "Versatile sports facility supporting multiple games including cricket, football, and badminton with modern facilities.",
+    pricePerHour: 1500,
+    openTime: "06:00:00",
+    closeTime: "22:00:00",
+    // Legacy/computed fields for UI compatibility
     category: "volleyball",
     location: {
       address: "Plot 12, Industrial Estate, Andheri East",
@@ -237,15 +259,20 @@ const mockTurfs: Turf[] = [
     ],
     rating: 4.7,
     reviewCount: 18,
-    vendorId: "3",
     createdAt: new Date("2024-01-20").toISOString(),
     updatedAt: new Date("2024-01-20").toISOString(),
   },
   {
     id: "4",
     name: "Elite Tennis Courts",
+    vendorId: "5",
+    categoryId: "tennis-1",
     description:
       "Premium tennis courts with synthetic grass surface and professional net systems. Ideal for coaching and tournaments.",
+    pricePerHour: 2000,
+    openTime: "06:00:00",
+    closeTime: "22:00:00",
+    // Legacy/computed fields for UI compatibility
     category: "tennis",
     location: {
       address: "23, Club Road, Juhu",
@@ -316,15 +343,20 @@ const mockTurfs: Turf[] = [
     ],
     rating: 4.6,
     reviewCount: 28,
-    vendorId: "3",
     createdAt: new Date("2024-01-12").toISOString(),
     updatedAt: new Date("2024-01-12").toISOString(),
   },
   {
     id: "5",
     name: "Urban Basketball Court",
+    vendorId: "6",
+    categoryId: "basketball-1",
     description:
       "Modern indoor basketball court with wooden flooring, air conditioning, and professional hoops. Perfect for leagues and practice.",
+    pricePerHour: 1200,
+    openTime: "08:00:00",
+    closeTime: "22:00:00",
+    // Legacy/computed fields for UI compatibility
     category: "basketball",
     location: {
       address: "Building 7, Phoenix Mall, Lower Parel",
@@ -394,15 +426,20 @@ const mockTurfs: Turf[] = [
     ],
     rating: 4.3,
     reviewCount: 15,
-    vendorId: "3",
     createdAt: new Date("2024-01-08").toISOString(),
     updatedAt: new Date("2024-01-08").toISOString(),
   },
   {
     id: "6",
     name: "Premier Football Ground",
+    vendorId: "7",
+    categoryId: "football-2",
     description:
       "Top-notch football facility with natural grass, professional drainage, and stadium-style seating for matches.",
+    pricePerHour: 3000,
+    openTime: "06:00:00",
+    closeTime: "22:00:00",
+    // Legacy/computed fields for UI compatibility
     category: "football",
     location: {
       address: "78, Eastern Express Highway, Thane",
@@ -473,7 +510,6 @@ const mockTurfs: Turf[] = [
     ],
     rating: 4.9,
     reviewCount: 42,
-    vendorId: "3",
     createdAt: new Date("2024-01-05").toISOString(),
     updatedAt: new Date("2024-01-05").toISOString(),
   },
@@ -517,33 +553,40 @@ export const createTurf = createAsyncThunk(
     try {
       // Call the real API service
       const response = await turfService.createTurf(turfData);
-      
+
       // Map the backend response to our frontend Turf structure
       const newTurf: Turf = {
         id: response.id || Date.now().toString(),
         name: response.name,
-        description: response.description,
-        category: response.category || "football", // Default fallback
+        vendorId: response.vendorId || "1",
+        categoryId: response.categoryId || "default-1",
         location: {
           address: response.location || "",
           city: "", // Backend doesn't provide this separately
           state: "",
           zipCode: "",
         },
+        description: response.description,
+        pricePerHour: response.pricePerHour || 0,
+        openTime: response.openTime || "06:00:00",
+        closeTime: response.closeTime || "22:00:00",
+        // Legacy/computed fields for UI compatibility
+        category: response.category || "football", // Default fallback
         pricing: {
           hourlyRate: response.pricePerHour || 0,
           currency: "INR",
         },
         rating: 0,
         reviewCount: 0,
-        vendorId: response.vendorId || "1",
         createdAt: response.createdAt || new Date().toISOString(),
         updatedAt: response.updatedAt || new Date().toISOString(),
-        images: ["https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=New+Turf"],
+        images: [
+          "https://via.placeholder.com/400x300/4CAF50/FFFFFF?text=New+Turf",
+        ],
         amenities: [],
-        availability: []
+        availability: [],
       };
-      
+
       return newTurf;
     } catch (error) {
       return rejectWithValue(
@@ -556,38 +599,17 @@ export const createTurf = createAsyncThunk(
 // Update existing turf
 export const updateTurf = createAsyncThunk(
   "turf/updateTurf",
-  async ({ id, turfData }: { id: string; turfData: any }, { rejectWithValue }) => {
+  async (
+    { id, turfData }: { id: string; turfData: any },
+    { rejectWithValue }
+  ) => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Find existing turf and update it
-      const existingTurf = mockTurfs.find((t) => t.id === id);
-      if (!existingTurf) {
-        throw new Error("Turf not found");
-      }
-      
-      // Map form data to Turf interface structure
-      const updatedTurf = {
-        ...existingTurf,
-        name: turfData.name || existingTurf.name,
-        description: turfData.description || existingTurf.description,
-        category: turfData.sportType || turfData.category || existingTurf.category,
-        location: {
-          ...existingTurf.location,
-          address: turfData.addressLine1 || turfData.location?.address || existingTurf.location.address,
-          city: turfData.city || turfData.location?.city || existingTurf.location.city,
-          state: turfData.state || turfData.location?.state || existingTurf.location.state,
-          zipCode: turfData.postalCode || turfData.location?.zipCode || existingTurf.location.zipCode,
-        },
-        pricing: {
-          ...existingTurf.pricing,
-          hourlyRate: turfData.pricePerSlot || turfData.pricing?.hourlyRate || existingTurf.pricing.hourlyRate,
-          currency: turfData.currency || existingTurf.pricing.currency,
-        },
-        updatedAt: new Date().toISOString()
-      };
-      
+      // Convert frontend form data to backend format
+      const backendData = turfService.convertFormDataToBackend(turfData);
+
+      // Call the actual API
+      const updatedTurf = await turfService.updateTurf(id, backendData);
+
       return updatedTurf;
     } catch (error) {
       return rejectWithValue(
@@ -602,15 +624,9 @@ export const deleteTurf = createAsyncThunk(
   "turf/deleteTurf",
   async (id: string, { rejectWithValue }) => {
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      
-      // Check if turf exists
-      const existingTurf = mockTurfs.find((t) => t.id === id);
-      if (!existingTurf) {
-        throw new Error("Turf not found");
-      }
-      
+      // Call the actual API
+      await turfService.deleteTurf(id);
+
       return id;
     } catch (error) {
       return rejectWithValue(
@@ -625,6 +641,7 @@ const initialState: TurfState = {
   selectedTurf: null,
   isLoading: false,
   error: null,
+  isError: false,
   filters: {},
 };
 
@@ -651,6 +668,7 @@ const turfSlice = createSlice({
       .addCase(fetchTurfs.pending, (state) => {
         state.isLoading = true;
         state.error = null;
+        state.isError = false;
       })
       .addCase(fetchTurfs.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -660,6 +678,7 @@ const turfSlice = createSlice({
       .addCase(fetchTurfs.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+        state.isError = true;
       })
 
       // Fetch turf by ID
@@ -699,7 +718,7 @@ const turfSlice = createSlice({
       })
       .addCase(updateTurf.fulfilled, (state, action) => {
         state.isLoading = false;
-        const index = state.turfs.findIndex(t => t.id === action.payload.id);
+        const index = state.turfs.findIndex((t) => t.id === action.payload.id);
         if (index !== -1) {
           state.turfs[index] = action.payload;
         }
@@ -717,7 +736,7 @@ const turfSlice = createSlice({
       })
       .addCase(deleteTurf.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.turfs = state.turfs.filter(t => t.id !== action.payload);
+        state.turfs = state.turfs.filter((t) => t.id !== action.payload);
         state.error = null;
       })
       .addCase(deleteTurf.rejected, (state, action) => {

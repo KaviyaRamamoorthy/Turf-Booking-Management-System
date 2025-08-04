@@ -1,17 +1,17 @@
 com\turf\repository\TurfRepository.class
+com\turf\controller\BookingController.class
 com\turf\entity\Booking.class
 com\turf\service\impl\UserServiceImpl.class
 com\turf\repository\UserRepository.class
 com\turf\repository\CategoryRepository.class
 com\turf\config\CorsConfig.class
 com\turf\config\JwtAuthenticationFilter.class
+com\turf\dto\StatusCountDto.class
 com\turf\controller\UserController.class
-com\turf\entity\UserRole.class
 com\turf\service\impl\OtpServiceImpl.class
 com\turf\service\impl\OtpServiceImpl$OtpEntry.class
 com\turf\dto\OtpRequest.class
 com\turf\dto\CategoryDto.class
-com\turf\repository\UserRoleRepository.class
 com\turf\service\impl\TurfServiceImpl.class
 com\turf\util\ApiResponse.class
 com\turf\constants\CommonConstants.class
@@ -21,6 +21,7 @@ com\turf\service\TurfService.class
 com\turf\service\CategoryService.class
 com\turf\service\impl\RoleServiceImpl.class
 com\turf\service\impl\CustomUserDetailsService.class
+com\turf\config\MailConfig.class
 com\turf\controller\TestController.class
 com\turf\controller\CategoryController.class
 com\turf\service\OtpService.class

@@ -5,7 +5,7 @@ import java.util.UUID;
 /**
  * Data Transfer Object for Category entity.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public class CategoryDto {
     private UUID id;

@@ -17,14 +17,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Implementation of OtpService using in-memory ConcurrentHashMap for OTP storage and expiry.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @Service
 public class OtpServiceImpl implements OtpService {
     private static final Logger logger = LoggerFactory.getLogger(OtpServiceImpl.class);
     private static final SecureRandom random = new SecureRandom();
 
-    @Autowired
+    @Autowired(required = false)
     private JavaMailSender mailSender;
 
     private static class OtpEntry {
@@ -44,17 +44,31 @@ public class OtpServiceImpl implements OtpService {
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(CommonConstants.OTP_EXPIRY_MINUTES);
         otpStore.put(getKey(email, purpose), new OtpEntry(otp, expiry));
         logger.info("Generated OTP for {} (purpose: {}), expires at {}", email, purpose, expiry);
+        logger.info("=== DEVELOPMENT MODE: OTP for {} is {} ===", email, otp);
         // Send OTP email
         try {
+            if (mailSender == null) {
+                logger.warn("Mail sender not configured - skipping email sending");
+                logger.info("=== DEVELOPMENT MODE: OTP for {} is: {} ===", email, otp);
+                return;
+            }
+            
+            logger.info("Attempting to send OTP email to {}", email);
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setTo(email);
-            helper.setSubject("Your OTP Code");
-            helper.setText("Your OTP is: " + otp + ". It will expire in " + CommonConstants.OTP_EXPIRY_MINUTES + " minutes.");
+            helper.setFrom("kaviya.ramamoorthy@ideas2it.com");
+            helper.setSubject("Turf Booking - Your OTP Code");
+            helper.setText("Your OTP for Turf Booking registration is: " + otp + 
+                          ". It will expire in " + CommonConstants.OTP_EXPIRY_MINUTES + " minutes." +
+                          "\n\nIf you didn't request this OTP, please ignore this email.");
+            
             mailSender.send(message);
-            logger.info("OTP email sent to {}", email);
+            logger.info("✅ OTP email successfully sent to {}", email);
         } catch (Exception e) {
-            logger.error("Failed to send OTP email to {}", email, e);
+            logger.error("❌ Failed to send OTP email to {}: {}", email, e.getMessage());
+            logger.error("Email error details: ", e);
+            logger.info("=== DEVELOPMENT MODE: OTP for {} is: {} ===", email, otp);
         }
     }
 

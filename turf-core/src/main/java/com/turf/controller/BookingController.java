@@ -20,7 +20,7 @@ import java.util.UUID;
 /**
  * REST Controller for booking operations.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @RestController
 @RequestMapping("/api/bookings")

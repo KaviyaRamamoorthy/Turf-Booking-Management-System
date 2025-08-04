@@ -29,7 +29,7 @@ const TurfBookingsFilters: React.FC<TurfBookingsFiltersProps> = ({
   // Fetch turfs on component mount
   useEffect(() => {
     if (turfs.length === 0) {
-      dispatch(fetchTurfs());
+      dispatch(fetchTurfs(undefined));
     }
   }, [dispatch, turfs.length]);
 

@@ -14,9 +14,9 @@ const TurfManagementContainer: React.FC = () => {
   const [selectedTurf, setSelectedTurf] = useState<Turf | null>(null);
   const [editMode, setEditMode] = useState(false);
 
-  const isModalVisible = modals["turfForm"] || false;
+  const isTurfModalVisible = modals["turfForm"] || false;
 
-  const handleCloseModal = () => {
+  const handleCloseTurfModal = () => {
     dispatch(closeModal("turfForm"));
     setSelectedTurf(null);
     setEditMode(false);
@@ -74,10 +74,14 @@ const TurfManagementContainer: React.FC = () => {
 
   return (
     <>
-      <TurfManagementPage onEditTurf={handleEditTurf} onAddTurf={handleAddTurf} onDeleteTurf={handleDeleteTurf} />
+      <TurfManagementPage
+        onEditTurf={handleEditTurf}
+        onAddTurf={handleAddTurf}
+        onDeleteTurf={handleDeleteTurf}
+      />
       <TurfFormModal
-        visible={isModalVisible}
-        onHide={handleCloseModal}
+        visible={isTurfModalVisible}
+        onHide={handleCloseTurfModal}
         editMode={editMode}
         turfToEdit={selectedTurf}
       />
@@ -86,4 +90,4 @@ const TurfManagementContainer: React.FC = () => {
   );
 };
 
-export default TurfManagementContainer; 
+export default TurfManagementContainer;

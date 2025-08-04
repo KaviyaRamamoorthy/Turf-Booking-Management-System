@@ -2,9 +2,12 @@ import { Badge } from "primereact/badge";
 import { Button } from "primereact/button";
 import { Chip } from "primereact/chip";
 import { Dialog } from "primereact/dialog";
-import React from "react";
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import turfImage from "../../assets/turf.jpg";
-import type { Turf } from "../../types";
+import type { RootState, Turf } from "../../types";
+import type { AppDispatch } from "../../store";
+import { fetchCategories } from "../../store/slices/categorySlice";
 
 interface TurfDetailsModalProps {
   turf: Turf | null;
@@ -19,10 +22,46 @@ const TurfDetailsModal: React.FC<TurfDetailsModalProps> = ({
   onHide,
   onBook,
 }) => {
+  // Get categories from Redux store to map categoryId to category name
+  const dispatch = useDispatch<AppDispatch>();
+  const { categories, isLoading: categoriesLoading } = useSelector(
+    (state: RootState) => state.category
+  );
+
+  // Ensure categories are loaded - only run once on mount
+  useEffect(() => {
+    if (categories.length === 0 && !categoriesLoading) {
+      console.log("TurfDetailsModal: Loading categories...");
+      dispatch(fetchCategories());
+    }
+  }, [dispatch]); // Only depend on dispatch to prevent infinite loops
+
   if (!turf) return null;
 
-  const getCategoryColor = (category: string) => {
-    switch (category.toLowerCase()) {
+  // Find the category name from categoryId
+  const getCategoryName = () => {
+    if (turf.category?.name) {
+      // If category object is already populated, use it
+      return turf.category.name;
+    }
+
+    // If categories are still loading, show loading state
+    if (categoriesLoading) {
+      return "Loading...";
+    }
+
+    // Otherwise, find the category by categoryId from Redux store
+    const category = categories.find((cat) => cat.id === turf.categoryId);
+
+    return category?.name || "Unknown";
+  };
+
+  const categoryName = getCategoryName();
+
+  const getCategoryColor = (categoryName: string | undefined) => {
+    if (!categoryName) return "contrast";
+
+    switch (categoryName.toLowerCase()) {
       case "football":
         return "success";
       case "cricket":
@@ -36,6 +75,57 @@ const TurfDetailsModal: React.FC<TurfDetailsModalProps> = ({
       default:
         return "contrast";
     }
+  };
+
+  const getCategoryDisplayName = (categoryName: string | undefined) => {
+    if (!categoryName) return "Unknown";
+
+    switch (categoryName.toLowerCase()) {
+      case "football":
+        return "Football";
+      case "cricket":
+        return "Cricket";
+      case "tennis":
+        return "Tennis";
+      case "basketball":
+        return "Basketball";
+      case "volleyball":
+        return "Volleyball";
+      default:
+        return categoryName;
+    }
+  };
+
+  // Helper function to safely render location
+  const getLocationDisplay = () => {
+    // First check if locationData exists (parsed location object)
+    if (turf.locationData) {
+      return turf.locationData;
+    }
+
+    // Fall back to location string - try to parse or use as is
+    if (typeof turf.location === "string") {
+      // If it's a string, return a default structure
+      return {
+        address: turf.location,
+        city: "",
+        state: "",
+        zipCode: "",
+      };
+    }
+
+    // Handle case where location is incorrectly an object (from turfSlice bug)
+    if (turf.location && typeof turf.location === "object") {
+      return turf.location as any;
+    }
+
+    // Default fallback
+    return {
+      address: "Location not specified",
+      city: "",
+      state: "",
+      zipCode: "",
+    };
   };
 
   const formatCurrency = (amount: number) => {
@@ -76,9 +166,10 @@ const TurfDetailsModal: React.FC<TurfDetailsModalProps> = ({
   const modalHeader = (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <Badge
-          value={turf.category.toUpperCase()}
-          severity={getCategoryColor(turf.category)}
+         <Badge
+          value={getCategoryDisplayName(categoryName)}
+          severity={getCategoryColor(categoryName)}
+          className="text-xs font-medium"
         />
         <h2 className="text-xl font-bold text-gray-800 m-0">{turf.name}</h2>
       </div>
@@ -93,7 +184,7 @@ const TurfDetailsModal: React.FC<TurfDetailsModalProps> = ({
   const modalFooter = (
     <div className="flex justify-between items-center py-2">
       <div className="text-2xl font-bold text-green-600">
-        {formatCurrency(turf.pricing.hourlyRate)}
+        {formatCurrency(turf.pricing?.hourlyRate || turf.pricePerHour || 0)}
         <span className="text-sm font-normal text-gray-600 ml-1">/hour</span>
       </div>
       <div className="flex gap-3">
@@ -137,13 +228,6 @@ const TurfDetailsModal: React.FC<TurfDetailsModalProps> = ({
             alt={turf.name}
             className="w-full h-64 object-cover rounded-lg"
           />
-          <div className="absolute top-4 right-4 bg-white rounded-full px-3 py-1 flex items-center gap-2 shadow-lg">
-            <i className="pi pi-star-fill text-yellow-500"></i>
-            <span className="font-semibold">{turf.rating}</span>
-            <span className="text-sm text-gray-600">
-              ({turf.reviewCount} reviews)
-            </span>
-          </div>
         </div>
 
         {/* Location & Description */}
@@ -154,13 +238,23 @@ const TurfDetailsModal: React.FC<TurfDetailsModalProps> = ({
               Location
             </h3>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="font-medium text-gray-800">
-                {turf.location.address}
-              </p>
-              <p className="text-gray-600">
-                {turf.location.city}, {turf.location.state} -{" "}
-                {turf.location.zipCode}
-              </p>
+              {(() => {
+                const locationData = getLocationDisplay();
+                return (
+                  <>
+                    <p className="font-medium text-gray-800">
+                      {locationData.address}
+                    </p>
+                    {(locationData.city || locationData.state || locationData.zipCode) && (
+                      <p className="text-gray-600">
+                        {[locationData.city, locationData.state, locationData.zipCode]
+                          .filter(part => part && part.trim() !== "")
+                          .join(", ")}
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
 
@@ -174,24 +268,6 @@ const TurfDetailsModal: React.FC<TurfDetailsModalProps> = ({
                 {turf.description}
               </p>
             </div>
-          </div>
-        </div>
-
-        {/* Amenities */}
-        <div>
-          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <i className="pi pi-cog text-blue-500"></i>
-            Amenities
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {turf.amenities.map((amenity) => (
-              <Chip
-                key={amenity.id}
-                label={amenity.name}
-                icon={amenity.icon}
-                className="!bg-blue-100 !text-blue-800"
-              />
-            ))}
           </div>
         </div>
 
@@ -223,10 +299,12 @@ const TurfDetailsModal: React.FC<TurfDetailsModalProps> = ({
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="text-gray-600 text-sm">
-                      10:00 AM - 10:00 PM
+                      {turf.openTime && turf.closeTime
+                        ? `${formatTime(turf.openTime)} - ${formatTime(turf.closeTime)}`
+                        : "Hours not specified"}
                     </span>
                     <span className="text-green-600 font-semibold text-sm">
-                      {formatCurrency(turf.pricing.hourlyRate)}/hr
+                      {formatCurrency(turf.pricing?.hourlyRate || turf.pricePerHour || 0)}/hr
                     </span>
                   </div>
                 </div>

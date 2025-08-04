@@ -3,7 +3,7 @@ package com.turf.exception;
 /**
  * Exception thrown for unauthorized access.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public class UnauthorizedException extends RuntimeException {
     public UnauthorizedException(String message) {

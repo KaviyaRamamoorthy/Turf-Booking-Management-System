@@ -1,37 +1,39 @@
 // User and Authentication Types
-export type UserRole = "admin" | "customer" | "vendor";
+export type UserRole = "admin" | "customer" | "vendor" | "ADMIN" | "CUSTOMER" | "VENDOR";
 
+// Import StatusCounts from admin booking service
+import type { StatusCounts } from "../services/adminBookingService";
+
+// Backend-aligned User types based on simplified UserDto
 export interface User {
-  id: string;
+  id: string; // UUID from backend
+  fullName: string; // matches backend field name
   email: string;
-  name: string;
-  phone: string;
-  role: UserRole;
-  address?: {
-    pincode: string;
-    state: string;
-    city: string;
-  };
-  preferences: UserPreferences;
-  createdAt: string; // ISO string for Redux state
-  updatedAt: string; // ISO string for Redux state
+  phoneNumber: string; // matches backend field name
+  role: UserRole; // Simplified to single role field
+  firstName?: string; // Legacy compatibility
+  lastName?: string; // Legacy compatibility
+  isVerified: boolean;
+  isActive: boolean;
+  vendorApprovalStatus?: string;
+  createdAt?: string; // ISO date string
+  updatedAt?: string; // ISO date string
+  // Frontend-only fields for compatibility
+  name?: string; // computed from fullName for backwards compatibility
+  phone?: string; // computed from phoneNumber for backwards compatibility
+  preferences?: UserPreferences; // Frontend-only for UI settings
 }
 
-// API User interface with Date objects
-export interface ApiUser {
+// Backend RoleDto structure
+export interface RoleDto {
   id: string;
-  email: string;
   name: string;
-  phone: string;
-  role: UserRole;
-  address?: {
-    pincode: string;
-    state: string;
-    city: string;
-  };
-  preferences: UserPreferences;
-  createdAt: Date;
-  updatedAt: Date;
+  description?: string;
+}
+
+// Backend-aligned API User interface
+export interface ApiUser extends User {
+  // Same structure since backend uses DTOs directly
 }
 
 export interface UserPreferences {
@@ -48,25 +50,46 @@ export interface AuthState {
   error: string | null;
 }
 
-// Turf Types
-export type TurfCategory =
-  | "football"
-  | "cricket"
-  | "tennis"
-  | "basketball"
-  | "volleyball";
-
-export interface Location {
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
+// Backend-aligned Category types based on CategoryDto
+export interface Category {
+  id: string; // UUID from backend
+  name: string;
+  description?: string;
 }
 
+export interface CategoryState {
+  categories: Category[];
+  selectedCategory: Category | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+// Backend-aligned Turf types based on TurfDto
+export interface Turf {
+  id: string; // UUID from backend
+  name: string;
+  vendorId: string; // UUID from backend
+  categoryId: string; // UUID from backend
+  location: any; // Accept both string and object for compatibility
+  description?: string;
+  pricePerHour: number; // BigDecimal from backend as number
+  openTime: string; // LocalTime from backend as HH:MM:SS
+  closeTime: string; // LocalTime from backend as HH:MM:SS
+  // Legacy/extended fields for compatibility
+  createdAt?: string;
+  updatedAt?: string;
+  // Frontend computed fields for UI
+  category?: any; // Flexible - can be a string or Category object
+  locationData?: Location; // parsed from location string for display
+  pricing?: PricingInfo; // computed from pricePerHour
+  images?: string[]; // frontend-only for now
+  rating?: number; // frontend-only for now
+  reviewCount?: number; // frontend-only for now
+  amenities?: Amenity[]; // frontend-only for now
+  availability?: AvailabilitySchedule[]; // frontend-only for now
+}
+
+// Legacy pricing structure for UI compatibility
 export interface PricingInfo {
   hourlyRate: number;
   currency: string;
@@ -77,59 +100,9 @@ export interface PricingInfo {
   }[];
 }
 
-export interface Amenity {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-}
-
-export interface TimeSlot {
-  startTime: string;
-  endTime: string;
-  isAvailable: boolean;
-  price: number;
-}
-
-export interface AvailabilitySchedule {
-  dayOfWeek: number; // 0-6 (Sunday-Saturday)
-  slots: TimeSlot[];
-  isOpen: boolean;
-}
-
-export interface Turf {
-  id: string;
-  name: string;
-  description: string;
-  category: TurfCategory;
-  location: Location;
-  pricing: PricingInfo;
-  amenities: Amenity[];
-  images: string[];
-  availability: AvailabilitySchedule[];
-  rating: number;
-  reviewCount: number;
-  vendorId: string;
-  createdAt: string; // ISO string for Redux state
-  updatedAt: string; // ISO string for Redux state
-}
-
-// API Turf interface with Date objects
-export interface ApiTurf {
-  id: string;
-  name: string;
-  description: string;
-  category: TurfCategory;
-  location: Location;
-  pricing: PricingInfo;
-  amenities: Amenity[];
-  images: string[];
-  availability: AvailabilitySchedule[];
-  rating: number;
-  reviewCount: number;
-  vendorId: string;
-  createdAt: Date;
-  updatedAt: Date;
+// Backend-aligned API Turf interface
+export interface ApiTurf extends Turf {
+  // Same structure since backend uses DTOs directly
 }
 
 export interface TurfState {
@@ -137,76 +110,59 @@ export interface TurfState {
   selectedTurf: Turf | null;
   isLoading: boolean;
   error: string | null;
+  isError: boolean;
   filters: TurfFilters;
 }
 
 export interface TurfFilters {
-  category?: TurfCategory;
-  location?: string;
-  priceRange?: {
-    min: number;
-    max: number;
-  };
-  date?: Date;
-  time?: string;
+  keyword?: string; // matches backend SearchFilter
+  startDate?: string; // matches backend SearchFilter
+  endDate?: string; // matches backend SearchFilter
+  status?: string; // matches backend SearchFilter
+  page?: number; // matches backend SearchFilter
+  size?: number; // matches backend SearchFilter
 }
 
-// Booking Types
-export type BookingStatus =
-  | "pending"
-  | "confirmed"
-  | "cancelled"
-  | "completed"
-  | "no-show";
-
-export interface PaymentInfo {
-  id: string;
-  amount: number;
-  currency: string;
-  method: "card" | "cash" | "online";
-  status: "pending" | "completed" | "failed" | "refunded";
-  transactionId?: string;
-  paidAt?: string; // ISO string for Redux state
-}
-
-// API PaymentInfo interface with Date objects
-export interface ApiPaymentInfo {
-  id: string;
-  amount: number;
-  currency: string;
-  method: "card" | "cash" | "online";
-  status: "pending" | "completed" | "failed" | "refunded";
-  transactionId?: string;
-  paidAt?: Date;
-}
-
+// Backend-aligned Booking types based on BookingDto
 export interface Booking {
-  id: string;
-  turfId: string;
-  userId: string;
-  date: string; // ISO string for Redux state
-  timeSlot: TimeSlot;
+  id: string; // UUID from backend
+  customerId: string; // UUID from backend
+  turfId: string; // UUID from backend
+  turfName?: string; // Direct from backend
+  turfLocation?: string; // Direct from backend
+  categoryName?: string; // Direct from backend
+  customerName?: string; // Direct from backend
+  customerEmail?: string; // Direct from backend
+  bookingDate: string; // LocalDate from backend as YYYY-MM-DD
+  date?: string; // Legacy compatibility (alias for bookingDate)
+  startTime: string; // LocalTime from backend as HH:MM:SS
+  endTime: string; // LocalTime from backend as HH:MM:SS
+  timeSlot?: string; // Legacy single timeslot string
+  totalAmount: number; // BigDecimal from backend as number
+  bookingReference?: string; // Reference code
+  createdAt?: string; // ISO date string
+  updatedAt?: string; // ISO date string
   status: BookingStatus;
-  payment: PaymentInfo;
-  totalAmount: number;
-  notes?: string;
-  createdAt: string; // ISO string for Redux state
-  updatedAt: string; // ISO string for Redux state
+  // Frontend computed fields (for backward compatibility)
+  turf?: Turf; // populated from turfId
+  customer?: User; // populated from customerId
 }
 
-// API Booking interface with Date objects
-export interface ApiBooking {
-  id: string;
-  turfId: string;
-  userId: string;
-  date: Date;
-  timeSlot: TimeSlot;
-  status: BookingStatus;
-  payment: ApiPaymentInfo;
-  totalAmount: number;
-  notes?: string;
-  createdAt: Date;
-  updatedAt: Date;
+export type BookingStatus =
+  | "PENDING"
+  | "pending"
+  | "CONFIRMED"
+  | "confirmed"
+  | "CANCELLED"
+  | "cancelled"
+  | "COMPLETED"
+  | "completed"
+  | "REJECTED"
+  | "rejected";
+
+// Backend-aligned API Booking interface
+export interface ApiBooking extends Booking {
+  // Same structure since backend uses DTOs directly
 }
 
 export interface BookingState {
@@ -219,11 +175,41 @@ export interface BookingState {
 
 export interface BookingFilters {
   status?: BookingStatus;
-  dateRange?: {
-    start: Date;
-    end: Date;
-  };
+  bookingDate?: string; // Specific date filter
+  startDate?: string;
+  endDate?: string;
   turfId?: string;
+  customerId?: string;
+  page?: number;
+  size?: number;
+}
+
+// Legacy types for UI compatibility
+export interface TimeSlot {
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+  price: number;
+}
+
+export interface PaymentInfo {
+  id: string;
+  amount: number;
+  currency: string;
+  method: "card" | "cash" | "online";
+  status: "pending" | "completed" | "failed" | "refunded";
+  transactionId?: string;
+  paidAt?: string;
+}
+
+export interface ApiPaymentInfo {
+  id: string;
+  amount: number;
+  currency: string;
+  method: "card" | "cash" | "online";
+  status: "pending" | "completed" | "failed" | "refunded";
+  transactionId?: string;
+  paidAt?: Date;
 }
 
 // UI State Types
@@ -281,11 +267,12 @@ export interface RootState {
   admin: AdminState;
   category: CategoryState;
   adminBooking: {
-    bookings: any[];
-    selectedBooking: any | null;
+    bookings: Booking[];
+    selectedBooking: Booking | null;
+    statusCounts: StatusCounts | null;
     isLoading: boolean;
     error: string | null;
-    filters: any;
+    filters: BookingFilters;
     total: number;
     page: number;
     limit: number;
@@ -300,12 +287,11 @@ export interface UserState {
   error: string | null;
 }
 
-// API Response Types
+// Backend-aligned API Response Types
 export interface ApiResponse<T> {
   success: boolean;
-  data: T;
-  message?: string;
-  error?: string;
+  message: string;
+  data?: T;
 }
 
 export interface PaginatedResponse<T> {
@@ -318,51 +304,43 @@ export interface PaginatedResponse<T> {
   };
 }
 
-// Form Types
+// Form Types - updated to match backend structure
 export interface LoginForm {
   email: string;
   password: string;
 }
 
 export interface RegisterForm {
-  name: string;
+  fullName: string; // matches backend UserDto
   email: string;
-  phone: string;
-  password: string;
-  confirmPassword: string;
-  role: UserRole;
+  phoneNumber: string; // matches backend UserDto
+  passwordHash: string; // matches backend UserDto field name
+  role?: string;
+  // Address fields matching backend structure
+  doorNo?: string;
+  street?: string;
+  locality?: string;
+  location?: string;
 }
 
 export interface BookingForm {
   turfId: string;
-  date: string; // ISO string for Redux state
-  timeSlot: TimeSlot;
-  notes?: string;
+  bookingDate: string; // YYYY-MM-DD format for backend
+  startTime: string; // HH:MM:SS format for backend
+  endTime: string; // HH:MM:SS format for backend
 }
 
 export interface ProfileForm {
-  name: string;
-  phone: string;
-  address?: {
-    pincode: string;
-    state: string;
-    city: string;
-  };
-  preferences: UserPreferences;
+  fullName: string;
+  phoneNumber: string;
 }
 
-// Turf Management Types
+// Turf form data for frontend forms
 export interface TurfFormData {
   name: string;
   description: string;
-  category: string; // Category ID from backend
-  location: {
-    address: string;
-    city: string;
-    state: string;
-    country: string;
-    zipCode?: string;
-  };
+  category: string; // Category ID
+  location: string; // Single address field instead of object
   pricing: {
     hourlyRate: number;
     currency: string;
@@ -372,53 +350,79 @@ export interface TurfFormData {
   slotInterval: number;
 }
 
-export interface CreateTurfRequest {
+// Backend request/response interfaces
+export interface AuthRequest {
+  email: string;
+  password: string;
+}
+
+export interface OtpRequest {
+  email: string;
+  otp: string;
+  newPassword?: string;
+}
+
+export interface SearchFilter {
+  keyword?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+  page?: number;
+  size?: number;
+}
+
+// Additional backend-aligned types
+export interface ModuleDto {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+// Legacy compatibility types (for gradual migration)
+export interface Amenity {
+  id: string;
   name: string;
   description: string;
-  sportType: TurfCategory;
-  addressLine1: string;
-  addressLine2?: string;
+  icon: string;
+}
+
+export interface AvailabilitySchedule {
+  dayOfWeek: number;
+  slots: TimeSlot[];
+  isOpen: boolean;
+}
+
+export interface Location {
+  address: string;
   city: string;
   state: string;
-  country: string;
-  postalCode?: string;
-  latitude?: number;
-  longitude?: number;
-  startTime: string;
-  endTime: string;
-  slotInterval: number;
-  pricePerSlot: number;
+  zipCode: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
 }
 
-export interface UpdateTurfRequest extends Partial<CreateTurfRequest> {
-  id: string;
-}
+// ----------------------------------
+// UI Helper & Legacy Compatibility Types
+// ----------------------------------
 
-// Navigation Types
+// Generic navigation menu item used across sidebar, header etc.
 export interface MenuItem {
   id: string;
   label: string;
-  icon: string;
+  icon?: string;
   path: string;
   roles: UserRole[];
-  children?: MenuItem[];
 }
 
+// Breadcrumb element for page navigation trails
 export interface BreadcrumbItem {
   label: string;
   path: string;
   isActive: boolean;
 }
 
-// Category Types
-export interface Category {
-  id: string;
-  name: string;
-  description?: string;
-}
+// Flexible turf category type (string id or full object)
+export type TurfCategory = Category | string;
 
-export interface CategoryState {
-  categories: Category[];
-  isLoading: boolean;
-  error: string | null;
-}

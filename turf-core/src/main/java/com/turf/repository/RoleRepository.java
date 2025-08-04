@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Repository for Role entity.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public interface RoleRepository extends JpaRepository<Role, UUID> {
     Optional<Role> findByName(String name);

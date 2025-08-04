@@ -1,25 +1,34 @@
 package com.turf.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 /**
  * Entity representing a Module in the system.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "modules")
 public class Module {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @Column(nullable = false, unique = true)
     private String name;
 
     @ManyToMany(mappedBy = "modules")
+    @EqualsAndHashCode.Exclude
     private Set<Role> roles;
 
     public UUID getId() { return id; }

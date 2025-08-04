@@ -1,30 +1,31 @@
-import { apiPost, apiGet } from '../utils/apiInterceptor';
-import { localStorageUtil } from '../utils/localStorage';
-import type { ApiResponse } from '../types';
+import { apiPost, apiGet, apiPut } from "../utils/apiInterceptor";
+import { localStorageUtil } from "../utils/localStorage";
+import type {
+  ApiResponse,
+  User,
+  AuthRequest,
+  OtpRequest,
+  UserRole,
+} from "../types";
 
-// Auth API interfaces
-export interface LoginRequest {
-  email: string;
-  password: string;
+// Auth API interfaces - aligned with backend
+export interface LoginRequest extends AuthRequest {
+  // email and password from AuthRequest
 }
 
 export interface LoginResponse {
   token: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-    phone?: string;
-  };
+  user: User;
 }
 
 export interface RegisterRequest {
-  name: string;
+  fullName: string; // matches backend UserDto
   email: string;
-  phone: string;
-  password: string;
-  role: string;
+  phoneNumber: string; // matches backend UserDto
+  passwordHash: string; // matches backend UserDto field name
+  role?: string;
+  // Optional address fields from backend UserDto
+
 }
 
 export interface RegisterResponse {
@@ -35,38 +36,48 @@ export interface ForgotPasswordRequest {
   email: string;
 }
 
-export interface ResetPasswordRequest {
-  email: string;
-  otp: string;
-  newPassword: string;
+export interface VerifyOtpRequest extends OtpRequest {
+  // email and otp from OtpRequest
+}
+
+export interface ResetPasswordRequest extends OtpRequest {
+  // email, otp, and newPassword from OtpRequest
 }
 
 class AuthService {
-  // Login user
+  // Login user - matches backend /api/auth/login
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     try {
-      // API returns { success: boolean, message: string, data: string }
-      const response = await apiPost<{ success: boolean; message: string; data: string }>('/auth/login', credentials);
-      
+      // Backend returns ApiResponse<string> where data is the JWT token
+      const response = await apiPost<ApiResponse<string>>("/auth/login", {
+        email: credentials.email,
+        password: credentials.password,
+      });
+
       if (!response.success || !response.data) {
-        throw new Error(response.message || 'Login failed - no token received');
+        throw new Error(response.message || "Login failed - no token received");
       }
 
       const token = response.data;
 
       // Store token in localStorage immediately
       localStorageUtil.setToken(token);
-      console.log('Token stored in localStorage:', token);
-      
+      console.log("Token stored in localStorage:", token);
+
       // Get user data using the token
-      const userData = await this.getCurrentUser(token);
-      
-      // Store user data in localStorage
+      const userData = await this.getCurrentUser();
+
+      console.log("Login - user data after getCurrentUser:", userData);
+
+      // Store user data in localStorage with backward compatibility
       localStorageUtil.setUserData({
         id: userData.id,
         email: userData.email,
-        name: userData.name,
-        role: userData.role,
+        name: userData.fullName, // backward compatibility
+        fullName: userData.fullName,
+        role: userData.role, // already converted to lowercase by getCurrentUser
+        phoneNumber: userData.phoneNumber,
+        phone: userData.phoneNumber, // backward compatibility
       });
 
       return {
@@ -74,145 +85,281 @@ class AuthService {
         user: userData,
       };
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       throw error;
     }
   }
 
-  // Register user
+  // Send OTP for registration
+  async sendOtp(email: string): Promise<{ message: string }> {
+    try {
+      const response = await apiPost<ApiResponse<string>>(
+        "/auth/send-otp",
+        {
+          email,
+        },
+        true
+      ); // Mark this as a public route
+
+      if (!response.success) {
+        throw new Error(response.message || "Failed to send OTP");
+      }
+
+      return {
+        message: response.message || "OTP sent successfully",
+      };
+    } catch (error) {
+      console.error("Send OTP error:", error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
+  }
+
+  // Register user - matches backend /api/auth/register
   async register(userData: RegisterRequest): Promise<RegisterResponse> {
     try {
-      const response: ApiResponse<string> = await apiPost<ApiResponse<string>>('/auth/register', userData);
-      
+      const response = await apiPost<ApiResponse<string>>(
+        "/auth/register",
+        userData,
+        true
+      ); // Mark this as a public route
+
       if (!response.success) {
-        throw new Error(response.message || 'Registration failed');
+        throw new Error(response.message || "Registration failed");
       }
 
       return {
-        message: response.message || 'Registration successful',
+        message:
+          response.message ||
+          "Registration successful. You can now login with your credentials.",
       };
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error("Registration error:", error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
       throw error;
     }
   }
 
-  // Get current user profile
-  async getCurrentUser(token?: string): Promise<LoginResponse['user']> {
+  // Verify OTP - matches backend /api/auth/verify-otp
+  async verifyOtp(otpData: VerifyOtpRequest): Promise<{ message: string }> {
     try {
-      // If no token provided, try to get from localStorage
-      const authToken = token || localStorageUtil.getToken();
-      
-      if (!authToken) {
-        throw new Error('No authentication token found');
+      const response = await apiPost<ApiResponse<string>>(
+        "/auth/verify-otp",
+        {
+          email: otpData.email,
+          otp: otpData.otp,
+        },
+        true
+      ); // Mark this as a public route
+
+      if (!response.success) {
+        throw new Error(response.message || "OTP verification failed");
       }
 
-      // According to API docs, use /users/me endpoint
-      const response = await apiGet<{ success: boolean; message: string; data: any }>('/users/me');
-      
-      if (!response.success || !response.data) {
-        throw new Error(response.message || 'Failed to get user data');
-      }
-
-      const userData = response.data;
-      
-      // Map backend user data to frontend format
       return {
-        id: userData.id,
-        email: userData.email,
-        name: userData.fullName || userData.email.split('@')[0],
-        role: userData.role?.toLowerCase() || 'customer',
-        phone: userData.phoneNumber,
+        message: response.message || "OTP verified successfully",
       };
     } catch (error) {
-      console.error('Get current user error:', error);
+      console.error("OTP verification error:", error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
       throw error;
     }
   }
 
-  // Forgot password
+  // Forgot password - matches backend /api/auth/forgot-password
   async forgotPassword(email: string): Promise<{ message: string }> {
     try {
-      const response: ApiResponse<string> = await apiPost<ApiResponse<string>>('/auth/forgot-password', { email });
-      
+      const response = await apiPost<ApiResponse<string>>(
+        "/auth/forgot-password",
+        { email }
+      );
+
       if (!response.success) {
-        throw new Error(response.message || 'Failed to send reset email');
+        throw new Error(response.message || "Failed to send reset email");
       }
 
       return {
-        message: response.message || 'Reset email sent successfully',
+        message: response.message || "Reset email sent successfully",
       };
     } catch (error) {
-      console.error('Forgot password error:', error);
+      console.error("Forgot password error:", error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
       throw error;
     }
   }
 
-  // Reset password
-  async resetPassword(resetData: ResetPasswordRequest): Promise<{ message: string }> {
+  // Reset password - matches backend /api/auth/reset-password
+  async resetPassword(
+    resetData: ResetPasswordRequest
+  ): Promise<{ message: string }> {
     try {
-      const response: ApiResponse<string> = await apiPost<ApiResponse<string>>('/auth/reset-password', resetData);
-      
+      const response = await apiPost<ApiResponse<string>>(
+        "/auth/reset-password",
+        {
+          email: resetData.email,
+          otp: resetData.otp,
+          newPassword: resetData.newPassword,
+        }
+      );
+
       if (!response.success) {
-        throw new Error(response.message || 'Failed to reset password');
+        throw new Error(response.message || "Password reset failed");
       }
 
       return {
-        message: response.message || 'Password reset successfully',
+        message: response.message || "Password reset successful",
       };
     } catch (error) {
-      console.error('Reset password error:', error);
+      console.error("Reset password error:", error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
       throw error;
     }
   }
 
-  // Verify OTP
-  async verifyOtp(email: string, otp: string): Promise<{ message: string }> {
+  // Get current user - matches backend /api/users/me
+  async getCurrentUser(): Promise<User> {
     try {
-      const response: ApiResponse<string> = await apiPost<ApiResponse<string>>('/auth/verify-otp', { email, otp });
-      
-      if (!response.success) {
-        throw new Error(response.message || 'Invalid OTP');
+      const response = await apiGet<ApiResponse<User>>("/users/me");
+
+      console.log("getCurrentUser API response:", response);
+
+      if (!response.success || !response.data) {
+        throw new Error(response.message || "Failed to get user data");
       }
 
-      return {
-        message: response.message || 'OTP verified successfully',
+      // Add backward compatibility fields and convert role to lowercase
+      const user = response.data;
+      console.log("Raw user data from backend:", user);
+
+      user.name = user.fullName; // for backward compatibility
+      user.phone = user.phoneNumber; // for backward compatibility
+
+      // Role is now directly available as a string field from backend
+
+      // Convert to lowercase and ensure we have a valid role
+      const roleString = user.role?.toLowerCase() || "customer";
+      const validRoles: UserRole[] = ["admin", "customer", "vendor"];
+      user.role = validRoles.includes(roleString as UserRole)
+        ? (roleString as UserRole)
+        : "customer";
+
+      user.preferences = user.preferences || {
+        // Add default preferences
+        theme: "light",
+        language: "en",
+        notifications: true,
       };
+
+      console.log("Processed user data with role:", user);
+      return user;
     } catch (error) {
-      console.error('Verify OTP error:', error);
+      console.error("Get current user error:", error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
+  }
+
+  // Update user profile - matches backend /api/users/me
+  async updateProfile(profileData: Partial<User>): Promise<User> {
+    try {
+      // Remove computed fields before sending to backend
+      const updateData = { ...profileData };
+      delete updateData.name; // computed field
+      delete updateData.phone; // computed field
+      // role field is handled directly by backend
+      delete updateData.id; // backend determines this from token
+
+      const response = await apiPut<ApiResponse<User>>(
+        "/users/me",
+        updateData
+      );
+
+      if (!response.success || !response.data) {
+        throw new Error(response.message || "Failed to update profile");
+      }
+
+      // Add backward compatibility fields
+      const user = response.data;
+      user.name = user.fullName;
+      user.phone = user.phoneNumber;
+
+      // Update localStorage
+      localStorageUtil.setUserData({
+        id: user.id,
+        email: user.email,
+        name: user.fullName,
+        fullName: user.fullName,
+        role: user.role || "",
+        phoneNumber: user.phoneNumber,
+        phone: user.phoneNumber,
+      });
+
+      return user;
+    } catch (error) {
+      console.error("Update profile error:", error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
       throw error;
     }
   }
 
   // Logout user
-  async logout(): Promise<void> {
-    try {
-      // Clear local storage
-      localStorageUtil.clearAuthData();
-      
-      // Optionally make a logout API call to invalidate token on server
-      // await apiPost('/auth/logout');
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Even if API call fails, clear local storage
-      localStorageUtil.clearAuthData();
-    }
+  logout(): void {
+    localStorageUtil.clearAuthData();
+    console.log("User logged out and localStorage cleared");
   }
 
   // Check if user is authenticated
   isAuthenticated(): boolean {
-    return localStorageUtil.isAuthenticated();
-  }
-
-  // Get stored token
-  getToken(): string | null {
-    return localStorageUtil.getToken();
+    const token = localStorageUtil.getToken();
+    return !!token;
   }
 
   // Get stored user data
-  getUserData() {
-    return localStorageUtil.getUserData();
+  getStoredUserData(): User | null {
+    const storedData = localStorageUtil.getUserData();
+    if (!storedData) return null;
+
+    // Convert StoredUserData to User with proper mapping
+    return {
+      id: storedData.id,
+      email: storedData.email,
+      fullName: storedData.fullName || storedData.name || "",
+      phoneNumber: storedData.phoneNumber || storedData.phone || "",
+      role: storedData.role as UserRole,
+      
+      isVerified: storedData.isVerified || false,
+      isActive: storedData.isActive || false,
+      vendorApprovalStatus: storedData.vendorApprovalStatus,
+      // Backward compatibility fields
+      name: storedData.fullName || storedData.name,
+      phone: storedData.phoneNumber || storedData.phone,
+      // Default preferences for frontend
+      preferences: {
+        theme: "light",
+        language: "en",
+        notifications: true,
+      },
+    };
+  }
+
+  // Get stored token
+  getStoredToken(): string | null {
+    return localStorageUtil.getToken();
   }
 }
 
-export const authService = new AuthService(); 
+export const authService = new AuthService();

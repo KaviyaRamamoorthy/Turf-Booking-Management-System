@@ -3,7 +3,7 @@ package com.turf.service;
 /**
  * Service interface for OTP operations (generation, validation, removal).
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public interface OtpService {
     void generateOtp(String email, String purpose);

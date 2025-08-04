@@ -3,7 +3,7 @@ package com.turf.constants;
 /**
  * Common constants used across the Turf Booking Platform.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public class CommonConstants {
     private CommonConstants() {}

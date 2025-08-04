@@ -18,16 +18,16 @@ const CustomerDashboard: React.FC = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    dispatch(fetchBookings());
+    dispatch(fetchBookings(undefined));
   }, [dispatch]);
 
   const upcomingBookings = bookings.filter(
     (booking) =>
-      new Date(booking.date) > new Date() && booking.status === "confirmed"
+      new Date(booking.date || booking.bookingDate) > new Date() && (booking.status === "confirmed" || booking.status === "CONFIRMED")
   );
 
   const pastBookings = bookings.filter(
-    (booking) => new Date(booking.date) < new Date()
+    (booking) => new Date(booking.date || booking.bookingDate) < new Date()
   );
 
   const statusBodyTemplate = (rowData: any) => {
@@ -98,7 +98,7 @@ const CustomerDashboard: React.FC = () => {
 
         <Card className="text-center">
           <div className="text-3xl font-bold text-purple-600 mb-2">
-            {bookings.filter((b) => b.status === "confirmed").length}
+            {bookings.filter((b) => b.status === "confirmed" || b.status === "CONFIRMED").length}
           </div>
           <div className="text-gray-600">Total Confirmed</div>
         </Card>
@@ -188,8 +188,8 @@ const CustomerDashboard: React.FC = () => {
                 <div>
                   <p className="font-medium">Booking #{booking.id}</p>
                   <p className="text-sm text-gray-600">
-                    {new Date(booking.date).toLocaleDateString()} at{" "}
-                    {booking.timeSlot.startTime}
+                    {new Date(booking.date || booking.bookingDate).toLocaleDateString()} at{" "}
+                    {typeof booking.timeSlot === 'string' ? booking.timeSlot : booking.startTime}
                   </p>
                 </div>
               </div>

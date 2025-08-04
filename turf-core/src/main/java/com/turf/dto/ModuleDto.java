@@ -4,7 +4,7 @@ import java.util.UUID;
 
 /**
  * Data Transfer Object for Module entity.
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public class ModuleDto {
     private UUID id;

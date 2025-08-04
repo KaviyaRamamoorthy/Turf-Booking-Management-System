@@ -1,22 +1,28 @@
 package com.turf.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Entity representing a booking in the Turf Booking Platform.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "bookings")
 public class Booking {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,6 +39,4 @@ public class Booking {
     private BigDecimal totalAmount;
     private String status;
     private LocalDateTime createdAt;
-
-    // Getters and setters omitted for brevity
 } 

@@ -2,16 +2,30 @@ import { Badge } from "primereact/badge";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import React from "react";
+import { Toast } from "primereact/toast";
+import React, { useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../store";
-import { fetchBookingDetails, setSelectedBooking } from "../../store/slices/adminBookingSlice";
+import { 
+  fetchBookingDetails, 
+  setSelectedBooking, 
+  confirmBooking, 
+  rejectBooking,
+  fetchStatusCounts
+} from "../../store/slices/adminBookingSlice";
 import { openModal } from "../../store/slices/uiSlice";
 import type { RootState } from "../../types";
 
 const TurfBookingsList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { bookings, isLoading, total } = useSelector((state: RootState) => state.adminBooking);
+  const { bookings, isLoading, total, error } = useSelector(
+    (state: RootState) => state.adminBooking
+  );
+
+  const [actionLoading, setActionLoading] = useState<{ [key: string]: string }>(
+    {}
+  );
+  const toast = useRef<Toast>(null);
 
   const handleRowClick = async (booking: any) => {
     try {
@@ -23,8 +37,78 @@ const TurfBookingsList: React.FC = () => {
     }
   };
 
+  const handleConfirmBooking = async (
+    bookingId: string,
+    event: React.MouseEvent
+  ) => {
+    event.stopPropagation();
+    setActionLoading((prev) => ({ ...prev, [bookingId]: "confirming" }));
+
+    try {
+      await dispatch(confirmBooking(bookingId)).unwrap();
+      // dispatch(fetchStatusCounts()); // Refresh status counts after confirming
+      toast.current?.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Booking confirmed successfully",
+        life: 3000,
+      });
+      console.log("✅ Booking confirmed successfully");
+    } catch (error) {
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to confirm booking",
+        life: 3000,
+      });
+      console.error("❌ Failed to confirm booking:", error);
+    } finally {
+      setActionLoading((prev) => {
+        const newState = { ...prev };
+        delete newState[bookingId];
+        return newState;
+      });
+    }
+  };
+
+  const handleDeclineBooking = async (
+    bookingId: string,
+    event: React.MouseEvent
+  ) => {
+    event.stopPropagation();
+    setActionLoading((prev) => ({ ...prev, [bookingId]: "declining" }));
+
+    try {
+      await dispatch(
+        rejectBooking({ bookingId, reason: "Declined by admin" })
+      ).unwrap();
+      // dispatch(fetchStatusCounts()); // Refresh status counts after declining
+      toast.current?.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Booking declined successfully",
+        life: 3000,
+      });
+      console.log("✅ Booking declined successfully");
+    } catch (error) {
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to decline booking",
+        life: 3000,
+      });
+      console.error("❌ Failed to decline booking:", error);
+    } finally {
+      setActionLoading((prev) => {
+        const newState = { ...prev };
+        delete newState[bookingId];
+        return newState;
+      });
+    }
+  };
+
   const getStatusSeverity = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "confirmed":
         return "success";
       case "pending":
@@ -64,7 +148,7 @@ const TurfBookingsList: React.FC = () => {
   const formatDateTime = (dateString: string, timeString: string) => {
     const date = new Date(dateString);
     const time = new Date(`2000-01-01T${timeString}`);
-    
+
     return `${date.toLocaleDateString("en-IN", {
       day: "2-digit",
       month: "short",
@@ -100,7 +184,9 @@ const TurfBookingsList: React.FC = () => {
     return (
       <div className="text-sm">
         <div className="font-medium">{rowData.turf.name}</div>
-        <div className="text-gray-600 capitalize">{rowData.turf.category}</div>
+        <div className="text-gray-600 capitalize">
+          {rowData.turf.category}
+        </div>
       </div>
     );
   };
@@ -126,6 +212,34 @@ const TurfBookingsList: React.FC = () => {
   };
 
   const actionsBodyTemplate = (rowData: any) => {
+    const isPending = rowData.status?.toLowerCase() === "pending";
+    const isLoading = actionLoading[rowData.id];
+
+    if (isPending) {
+      return (
+        <div className="flex gap-1">
+            <Button
+            icon="pi pi-check"
+            size="small"
+            className="!bg-green-500 !border-green-500 hover:!bg-green-600 disabled:!bg-green-400"
+            onClick={(e) => handleConfirmBooking(rowData.id, e)}
+            tooltip="Confirm"
+            loading={isLoading === "confirming"}
+            disabled={!!isLoading}
+          />
+          <Button
+            icon="pi pi-times"
+            size="small"
+            className="!bg-red-500 !border-red-500 hover:!bg-red-600 disabled:!bg-red-400"
+            onClick={(e) => handleDeclineBooking(rowData.id, e)}
+            tooltip="Decline"
+            loading={isLoading === "declining"}
+            disabled={!!isLoading}
+          />
+        </div>
+      );
+    }
+
     return (
       <Button
         icon="pi pi-eye"
@@ -139,6 +253,20 @@ const TurfBookingsList: React.FC = () => {
       />
     );
   };
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-red-200 p-12 text-center">
+        <div className="text-red-400 mb-4">
+          <i className="pi pi-times-circle text-6xl"></i>
+        </div>
+        <h3 className="text-xl font-semibold text-red-800 mb-2">
+          Failed to Fetch Bookings
+        </h3>
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
+  }
 
   if (bookings.length === 0 && !isLoading) {
     return (
@@ -158,6 +286,7 @@ const TurfBookingsList: React.FC = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <Toast ref={toast} />
       <DataTable
         value={bookings}
         loading={isLoading}
@@ -197,13 +326,6 @@ const TurfBookingsList: React.FC = () => {
           body={turfBodyTemplate}
         />
         <Column
-          field="customer.firstName"
-          header="Customer"
-          sortable
-          style={{ width: "200px" }}
-          body={customerBodyTemplate}
-        />
-        <Column
           field="totalAmount"
           header="Amount"
           sortable
@@ -219,7 +341,7 @@ const TurfBookingsList: React.FC = () => {
         />
         <Column
           header="Actions"
-          style={{ width: "80px" }}
+          style={{ width: "120px" }}
           body={actionsBodyTemplate}
         />
       </DataTable>

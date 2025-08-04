@@ -14,7 +14,7 @@ import java.util.UUID;
 
 /**
  * Controller for Module CRUD and user-accessible modules.
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @RestController
 @RequestMapping("/api/modules")

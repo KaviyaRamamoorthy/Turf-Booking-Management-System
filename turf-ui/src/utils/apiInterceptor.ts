@@ -2,7 +2,7 @@ import { localStorageUtil } from './localStorage';
 
 // Base API configuration
 export const API_CONFIG = {
-  BASE_URL: 'http://localhost:8080/api',
+  BASE_URL: import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : 'https://turf-booking-managements.onrender.com/api',
   TIMEOUT: 10000, // 10 seconds
 };
 
@@ -54,19 +54,28 @@ export const responseInterceptor = async (response: Response): Promise<Response>
 // Generic API request function with interceptors
 export const apiRequest = async <T>(
   url: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  isPublic = false
 ): Promise<T> => {
   const fullUrl = `${API_CONFIG.BASE_URL}${url}`;
-  
-  // Apply request interceptor
-  const interceptedOptions = requestInterceptor({
-    ...options,
-  });
+
+  let requestOptions = { ...options };
+
+  if (!isPublic) {
+    // Apply request interceptor for non-public routes
+    requestOptions = requestInterceptor(requestOptions);
+  } else {
+    // For public routes, just ensure default headers are present
+    requestOptions.headers = {
+      "Content-Type": "application/json",
+      ...requestOptions.headers,
+    };
+  }
 
   try {
-    console.log('Making API request to:', fullUrl);
-    console.log('Request options:', interceptedOptions);
-    const response = await fetch(fullUrl, interceptedOptions);
+    console.log("Making API request to:", fullUrl);
+    console.log("Request options:", requestOptions);
+    const response = await fetch(fullUrl, requestOptions);
     
     // Apply response interceptor
     const interceptedResponse = await responseInterceptor(response);
@@ -96,11 +105,19 @@ export const apiGet = <T>(url: string): Promise<T> => {
   return apiRequest<T>(url, { method: 'GET' });
 };
 
-export const apiPost = <T>(url: string, data?: any): Promise<T> => {
-  return apiRequest<T>(url, {
-    method: 'POST',
-    body: data ? JSON.stringify(data) : undefined,
-  });
+export const apiPost = <T>(
+  url: string,
+  data?: any,
+  isPublic = false
+): Promise<T> => {
+  return apiRequest<T>(
+    url,
+    {
+      method: "POST",
+      body: data ? JSON.stringify(data) : undefined,
+    },
+    isPublic
+  );
 };
 
 export const apiPut = <T>(url: string, data?: any): Promise<T> => {

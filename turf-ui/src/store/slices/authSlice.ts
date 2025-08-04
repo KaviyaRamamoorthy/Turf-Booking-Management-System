@@ -20,23 +20,8 @@ export const loginUser = createAsyncThunk(
         password: credentials.password,
       });
 
-      // Convert API response to User type
-      const user: User = {
-        id: response.user.id,
-        email: response.user.email,
-        name: response.user.name,
-        phone: response.user.phone || "",
-        role: response.user.role as UserRole,
-        preferences: {
-          theme: "light",
-          language: "en",
-          notifications: true,
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      return { user, token: response.token };
+      // response.user already has the proper structure and lowercase role from authService
+      return { user: response.user, token: response.token };
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Login failed"
@@ -48,26 +33,25 @@ export const loginUser = createAsyncThunk(
 export const registerUser = createAsyncThunk(
   "auth/register",
   async (
-    userData: RegisterForm & {
-      address?: { pincode: string; state: string; city: string };
+    userData: {
+      fullName: string;
+      email: string;
+      phoneNumber: string;
+      passwordHash: string;
+      role: string;
+
     },
     { rejectWithValue }
   ) => {
     try {
-      const response = await authService.register({
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone,
-        password: userData.password,
-        role: userData.role,
-      });
+      const response = await authService.register(userData);
 
       // For registration, we might need to handle OTP verification
       // For now, return a success message
       return {
         user: null,
         token: null,
-        message: response.message
+        message: response.message,
       };
     } catch (error) {
       return rejectWithValue(
@@ -97,30 +81,13 @@ export const getCurrentUser = createAsyncThunk(
     try {
       // Check if user is authenticated
       if (!authService.isAuthenticated()) {
-        throw new Error("User not authenticated");
+        throw new Error("No authentication token found");
       }
 
       const userData = await authService.getCurrentUser();
 
-      // Convert API response to User type
-      const user: User = {
-        id: userData.id,
-        email: userData.email,
-        name: userData.name,
-        phone: userData.phone || "+1234567890",
-        role: userData.role as UserRole,
-        preferences: {
-          theme: "light",
-          language: "en",
-          notifications: true,
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      const token = authService.getToken();
-
-      return { user, token };
+      // userData already has role converted to lowercase by authService
+      return { user: userData, token: authService.getStoredToken() };
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Failed to get current user"
@@ -128,6 +95,8 @@ export const getCurrentUser = createAsyncThunk(
     }
   }
 );
+
+// OTP verification removed - no longer needed for registration
 
 // Initial state
 const initialState: AuthState = {
@@ -170,7 +139,7 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.isAuthenticated = true;
         state.error = null;
-        
+
         // Store token and user data in localStorage
         localStorageUtil.setToken(action.payload.token);
         localStorageUtil.setUserData({
@@ -192,21 +161,11 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user;
-        state.token = action.payload.token;
-        state.isAuthenticated = true;
+        // Registration successful - user needs to login separately
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
         state.error = null;
-
-        // Store token and user data in localStorage if available
-        if (action.payload.token && action.payload.user) {
-          localStorageUtil.setToken(action.payload.token);
-          localStorageUtil.setUserData({
-            id: action.payload.user.id,
-            email: action.payload.user.email,
-            name: action.payload.user.name,
-            role: action.payload.user.role,
-          });
-        }
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -257,7 +216,9 @@ const authSlice = createSlice({
       .addCase(getCurrentUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
-      });
+      })
+
+      // OTP verification removed - no longer needed for registration
   },
 });
 

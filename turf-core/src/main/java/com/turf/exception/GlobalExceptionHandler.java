@@ -12,7 +12,7 @@ import org.springframework.web.context.request.WebRequest;
 /**
  * Global exception handler for the Turf Booking Platform.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {

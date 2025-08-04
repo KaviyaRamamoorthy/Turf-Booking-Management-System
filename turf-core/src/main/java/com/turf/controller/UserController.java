@@ -2,7 +2,8 @@ package com.turf.controller;
 
 import com.turf.constants.CommonConstants;
 import com.turf.dto.UserDto;
-import com.turf.dto.RoleDto;
+import java.util.Map;
+import java.util.Arrays;
 import com.turf.exception.BadRequestException;
 import com.turf.exception.ResourceNotFoundException;
 import com.turf.service.UserService;
@@ -21,7 +22,7 @@ import java.util.UUID;
 /**
  * Controller for user profile and admin user management endpoints.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @RestController
 @RequestMapping("/api/users")
@@ -38,7 +39,7 @@ public class UserController {
         String email = authentication.getName();
         UserDto user = userService.getUserByEmail(email);
         if (user == null) throw new ResourceNotFoundException(CommonConstants.MSG_USER_NOT_FOUND);
-        user.setRoles(userService.getUserRolesByEmail(email));
+        // Role is already included in UserDto from the simplified structure
         logger.info("Profile fetched for user: {}", email);
         return ResponseEntity.ok(new ApiResponse<>(true, CommonConstants.MSG_SUCCESS, user));
     }
@@ -51,11 +52,7 @@ public class UserController {
         // Only allow editing certain fields
         existing.setFullName(userDto.getFullName());
         existing.setPhoneNumber(userDto.getPhoneNumber());
-        existing.setDob(userDto.getDob());
-        existing.setDoorNo(userDto.getDoorNo());
-        existing.setStreet(userDto.getStreet());
-        existing.setLocality(userDto.getLocality());
-        existing.setLocation(userDto.getLocation());
+        // Note: dob, doorNo, street, locality, location fields removed in simplified structure
         UserDto updated = userService.updateUser(existing.getId(), existing);
         logger.info("Profile updated for user: {}", email);
         return ResponseEntity.ok(new ApiResponse<>(true, "Profile updated.", updated));
@@ -71,14 +68,22 @@ public class UserController {
 
     @PutMapping("/{id}/role")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<String>> updateUserRole(@PathVariable UUID id, @RequestBody RoleDto roleDto) {
-        if (roleDto == null || roleDto.getName() == null) throw new BadRequestException("Role name required.");
+    public ResponseEntity<ApiResponse<String>> updateUserRole(@PathVariable UUID id, @RequestBody Map<String, String> roleRequest) {
+        String roleName = roleRequest.get("role");
+        if (roleName == null || roleName.trim().isEmpty()) {
+            throw new BadRequestException("Role name required.");
+        }
         UserDto user = userService.getUserById(id);
         if (user == null) throw new ResourceNotFoundException(CommonConstants.MSG_USER_NOT_FOUND);
-        RoleDto role = roleService.getRoleByName(roleDto.getName());
-        if (role == null) throw new ResourceNotFoundException(CommonConstants.MSG_ROLE_NOT_FOUND);
-        // Implement role assignment logic in service layer as needed
-        logger.info("Admin updated role for user: {} to {}", id, roleDto.getName());
+        
+        // Validate role name (should be one of: CUSTOMER, ADMIN, VENDOR)
+        if (!Arrays.asList("CUSTOMER", "ADMIN", "VENDOR").contains(roleName.toUpperCase())) {
+            throw new BadRequestException("Invalid role. Must be one of: CUSTOMER, ADMIN, VENDOR");
+        }
+        
+        user.setRole(roleName.toUpperCase());
+        userService.updateUser(id, user);
+        logger.info("Admin updated role for user: {} to {}", id, roleName);
         return ResponseEntity.ok(new ApiResponse<>(true, "User role updated.", null));
     }
 

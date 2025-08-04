@@ -7,7 +7,7 @@ import java.util.UUID;
 /**
  * Data Transfer Object for Turf entity.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public class TurfDto {
     private UUID id;

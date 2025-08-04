@@ -3,13 +3,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Message } from "primereact/message";
+// authService import removed - no longer used for sendOtp
 import { registerUser } from "../../store/slices/authSlice";
 import type { RootState } from "../../types";
 import type { AppDispatch } from "../../store";
 import CustomInput from "../../components/common/CustomInput";
 import CustomEmailInput from "../../components/common/CustomEmailInput";
 import CustomDropdown from "../../components/common/CustomDropdown";
-import { InputOtp } from "primereact/inputotp";
+
+// OTP input removed - no longer needed
 
 const RegisterPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -18,62 +20,25 @@ const RegisterPage = () => {
 
   const [formData, setFormData] = useState({
     fullName: "",
-    pincode: "",
-    state: "",
-    city: "",
     email: "",
     phoneNumber: "",
     password: "",
     confirmPassword: "",
-    otp: "",
+    role: "CUSTOMER",
   });
 
   const [validationErrors, setValidationErrors] = useState<{
     fullName?: string;
-    pincode?: string;
-    state?: string;
-    city?: string;
     email?: string;
     phoneNumber?: string;
     password?: string;
     confirmPassword?: string;
-    otp?: string;
+    role?: string;
   }>({});
 
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpFieldEnabled, setOtpFieldEnabled] = useState(false);
+  // OTP-related state variables removed - no longer needed
 
-  // Indian states for dropdown
-  const states = [
-    "Andhra Pradesh",
-    "Arunachal Pradesh",
-    "Assam",
-    "Bihar",
-    "Chhattisgarh",
-    "Goa",
-    "Gujarat",
-    "Haryana",
-    "Himachal Pradesh",
-    "Jharkhand",
-    "Karnataka",
-    "Kerala",
-    "Madhya Pradesh",
-    "Maharashtra",
-    "Manipur",
-    "Meghalaya",
-    "Mizoram",
-    "Nagaland",
-    "Odisha",
-    "Punjab",
-    "Rajasthan",
-    "Sikkim",
-    "Tamil Nadu",
-    "Telangana",
-    "Tripura",
-    "Uttar Pradesh",
-    "Uttarakhand",
-    "West Bengal",
-  ];
+
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -90,19 +55,7 @@ const RegisterPage = () => {
       errors.fullName = "Full name is required";
     }
 
-    if (!formData.pincode.trim()) {
-      errors.pincode = "Pincode is required";
-    } else if (!/^\d{6}$/.test(formData.pincode)) {
-      errors.pincode = "Pincode must be 6 digits";
-    }
 
-    if (!formData.state) {
-      errors.state = "State is required";
-    }
-
-    if (!formData.city.trim()) {
-      errors.city = "City is required";
-    }
 
     if (!formData.email.trim()) {
       errors.email = "Email is required";
@@ -128,11 +81,7 @@ const RegisterPage = () => {
       errors.confirmPassword = "Passwords do not match";
     }
 
-    if (otpFieldEnabled && !formData.otp.trim()) {
-      errors.otp = "OTP is required";
-    } else if (otpFieldEnabled && !/^\d{6}$/.test(formData.otp)) {
-      errors.otp = "OTP must be 6 digits";
-    }
+    // OTP validation removed
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -141,9 +90,6 @@ const RegisterPage = () => {
   const isFormComplete = () => {
     return (
       formData.fullName.trim() &&
-      formData.pincode.trim() &&
-      formData.state &&
-      formData.city.trim() &&
       formData.email.trim() &&
       formData.phoneNumber.trim() &&
       formData.password.trim() &&
@@ -151,34 +97,7 @@ const RegisterPage = () => {
     );
   };
 
-  const isOtpComplete = () => {
-    return (
-      otpFieldEnabled && formData.otp.trim() && /^\d{6}$/.test(formData.otp)
-    );
-  };
-
-  const handleSendOtp = async () => {
-    setOtpFieldEnabled(true); // Enable OTP field immediately
-    if (!validateForm()) {
-      return;
-    }
-    try {
-      // Mock OTP service call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setOtpSent(true);
-      // Show success message (you can add a toast notification here)
-      console.log("OTP sent successfully!");
-    } catch (error) {
-      console.error("Failed to send OTP:", error);
-    }
-  };
-
-  const handleOtpChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, otp: value }));
-    if (validationErrors.otp) {
-      setValidationErrors((prev) => ({ ...prev, otp: undefined }));
-    }
-  };
+  // OTP-related functions removed
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,18 +107,13 @@ const RegisterPage = () => {
     }
 
     try {
+      // Direct user registration without OTP verification
       const registerData = {
-        name: formData.fullName,
+        fullName: formData.fullName,
         email: formData.email,
-        phone: formData.phoneNumber,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-        role: "customer" as const, // Default to customer role
-        address: {
-          pincode: formData.pincode,
-          state: formData.state,
-          city: formData.city,
-        },
+        phoneNumber: formData.phoneNumber,
+        passwordHash: formData.password,
+        role: formData.role,
       };
 
       await dispatch(registerUser(registerData)).unwrap();
@@ -236,38 +150,20 @@ const RegisterPage = () => {
               error={validationErrors.fullName}
               placeholder="Enter your full name"
             />
-            {/* Pincode Field */}
-            <CustomInput
-              id="pincode"
-              label="Pincode"
-              value={formData.pincode}
-              onChange={(e) => handleInputChange("pincode", e.target.value)}
-              icon={<i className="pi pi-map-marker" />}
-              error={validationErrors.pincode}
-              placeholder="Enter 6-digit pincode"
-              maxLength={6}
-              inputMode="numeric"
-            />
-            {/* State Field */}
+            {/* Role Field */}
             <CustomDropdown
-              id="state"
-              label="State"
-              value={formData.state}
-              onChange={(e) => handleInputChange("state", e.value)}
-              options={states}
-              placeholder="Select your state"
-              error={validationErrors.state}
+              id="role"
+              label="Role"
+              value={formData.role}
+              onChange={(e) => handleInputChange("role", e.value)}
+              options={[
+                { label: "Customer", value: "CUSTOMER" },
+                { label: "Admin", value: "ADMIN" },
+              ]}
+              placeholder="Select your role"
+              error={validationErrors.role}
             />
-            {/* City Field */}
-            <CustomInput
-              id="city"
-              label="City"
-              value={formData.city}
-              onChange={(e) => handleInputChange("city", e.target.value)}
-              icon={<i className="pi pi-building" />}
-              error={validationErrors.city}
-              placeholder="Enter your city"
-            />
+
             {/* Email Field */}
             <CustomEmailInput
               id="email"
@@ -351,51 +247,15 @@ const RegisterPage = () => {
                 </small>
               )}
             </div>
-            {/* Send OTP Button */}
-            <Button
-              type="button"
-              label={otpSent ? "OTP Sent ✓" : "Send OTP"}
-              icon={otpSent ? "pi pi-check" : "pi pi-send"}
-              className={`w-full ${otpSent ? "!bg-blue-600" : "!bg-blue-500"}`}
-              disabled={!isFormComplete() || otpSent}
-              onClick={handleSendOtp}
-              style={{ color: "white", fontWeight: "bold" }}
-            />
-            {/* OTP Field */}
-            <div className="space-y-2 mt-2">
-              <label
-                htmlFor="otp"
-                className="block text-sm font-medium text-gray-700"
-              >
-                OTP
-              </label>
-              <InputOtp
-                id="otp"
-                value={formData.otp}
-                onChange={(e) => handleOtpChange(e.value as string)}
-                length={6}
-                className={`w-full ${validationErrors.otp ? "p-invalid" : ""}`}
-                disabled={!otpFieldEnabled}
-                placeholder="-"
-              />
-              {validationErrors.otp && (
-                <small className="p-error block mt-1">
-                  {validationErrors.otp}
-                </small>
-              )}
-            </div>
-            {/* Error Message */}
-            {error && (
-              <Message severity="error" text={error} className="w-full" />
-            )}
-            {/* Sign Up Button */}
+           
+            {/* Register Button */}
             <Button
               type="submit"
-              label={isLoading ? "Creating Account..." : "Sign Up"}
+              label={isLoading ? "Creating Account..." : "Create Account"}
               icon={isLoading ? "pi pi-spinner pi-spin" : "pi pi-user-plus"}
               className="!w-full !bg-blue-600"
               loading={isLoading}
-              disabled={isLoading || !isOtpComplete()}
+              disabled={isLoading || !isFormComplete()}
               style={{ color: "white", fontWeight: "bold" }}
             />
             {/* Sign In Link */}

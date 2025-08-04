@@ -21,12 +21,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(255) NOT NULL,
-    phone_number VARCHAR(20),
-    dob DATE,
-    door_no VARCHAR(50),
-    street VARCHAR(255),
-    locality VARCHAR(255),
-    location VARCHAR(255),
+    phone_number VARCHAR(20) NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'CUSTOMER',
     verified BOOLEAN DEFAULT false,
     active BOOLEAN DEFAULT true,
     vendor_approval_status VARCHAR(20),
@@ -42,14 +38,7 @@ CREATE TABLE IF NOT EXISTS roles (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- User roles junction table
-CREATE TABLE IF NOT EXISTS user_roles (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    role_id UUID NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, role_id)
-);
+-- User roles junction table (removed - using direct role field in users table)
 
 -- Categories table
 CREATE TABLE IF NOT EXISTS categories (
@@ -99,9 +88,24 @@ INSERT INTO roles (name) VALUES
     ('VENDOR')
 ON CONFLICT (name) DO NOTHING;
 
+-- Insert default sports categories
+INSERT INTO categories (id, name, description) VALUES 
+('a1b2c3d4-e5f6-4789-a123-123456789abc', 'Football', 'Football/Soccer fields and pitches'),
+('b2c3d4e5-f6a7-4890-b234-234567890bcd', 'Cricket', 'Cricket grounds and pitches'),
+('c3d4e5f6-a7b8-4901-c345-345678901cde', 'Basketball', 'Basketball courts and arenas'),
+('d4e5f6a7-b8c9-4012-d456-456789012def', 'Tennis', 'Tennis courts and facilities'),
+('e5f6a7b8-c9d0-4123-e567-567890123efa', 'Volleyball', 'Volleyball courts and beach volleyball'),
+('f6a7b8c9-d0e1-4234-f678-678901234fab', 'Badminton', 'Badminton courts and halls'),
+('a7b8c9d0-e1f2-4345-a789-789012345abc', 'Hockey', 'Hockey fields and rinks'),
+('b8c9d0e1-f2a3-4456-b890-890123456bcd', 'Table Tennis', 'Table tennis and ping pong facilities'),
+('c9d0e1f2-a3b4-4567-c901-901234567cde', 'Squash', 'Squash courts and facilities'),
+('d0e1f2a3-b4c5-4678-d012-012345678def', 'Multi-Sport', 'Multi-purpose sports facilities')
+ON CONFLICT (id) DO NOTHING;
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_active ON users(active);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_turfs_vendor_id ON turfs(vendor_id);
 CREATE INDEX IF NOT EXISTS idx_turfs_category_id ON turfs(category_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_customer_id ON bookings(customer_id);

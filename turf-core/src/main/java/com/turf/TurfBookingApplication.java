@@ -2,10 +2,8 @@ package com.turf;
 
 import com.turf.entity.User;
 import com.turf.entity.Role;
-import com.turf.entity.UserRole;
 import com.turf.repository.UserRepository;
 import com.turf.repository.RoleRepository;
-import com.turf.repository.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -13,12 +11,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 /**
  * Main application class for Turf Booking Platform.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @SpringBootApplication
 public class TurfBookingApplication {
@@ -33,10 +31,10 @@ public class TurfBookingApplication {
 	}
 
 	@Bean
-	public CommandLineRunner seedAdmin(UserRepository userRepository, RoleRepository roleRepository, UserRoleRepository userRoleRepository, PasswordEncoder passwordEncoder) {
-		return args -> {
-			// Ensure ADMIN role exists
-			Role adminRole = roleRepository.findByName("ADMIN").orElseGet(() -> {
+	public CommandLineRunner seedAdmin(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+					return args -> {
+			// Ensure ADMIN role exists in roles table (for reference)
+			roleRepository.findByName("ADMIN").orElseGet(() -> {
 				Role r = new Role();
 				r.setName("ADMIN");
 				return roleRepository.save(r);
@@ -49,14 +47,12 @@ public class TurfBookingApplication {
 				admin.setEmail(adminEmail);
 				admin.setPasswordHash(passwordEncoder.encode(adminPassword));
 				admin.setPhoneNumber("0000000000");
+				admin.setRole("ADMIN");
 				admin.setVerified(true);
 				admin.setActive(true);
-				admin = userRepository.save(admin);
-				// Assign ADMIN role
-				UserRole userRole = new UserRole();
-				userRole.setUser(admin);
-				userRole.setRole(adminRole);
-				userRoleRepository.save(userRole);
+				admin.setCreatedAt(java.time.LocalDateTime.now());
+				admin.setUpdatedAt(java.time.LocalDateTime.now());
+				userRepository.save(admin);
 				System.out.println("Seeded admin user: " + adminEmail + " / " + adminPassword);
 			}
 		};

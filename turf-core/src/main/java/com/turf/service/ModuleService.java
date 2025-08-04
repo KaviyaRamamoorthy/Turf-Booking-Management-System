@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /**
  * Service interface for Module operations.
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public interface ModuleService {
     ModuleDto createModule(ModuleDto moduleDto);

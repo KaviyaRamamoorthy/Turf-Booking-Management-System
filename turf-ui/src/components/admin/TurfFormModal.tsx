@@ -7,7 +7,11 @@ import { InputTextarea } from "primereact/inputtextarea";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../store";
-import { createTurf, updateTurf } from "../../store/slices/turfSlice";
+import {
+  createTurf,
+  updateTurf,
+  fetchTurfs,
+} from "../../store/slices/turfSlice";
 import { addToast, closeModal } from "../../store/slices/uiSlice";
 import type { RootState, Turf, TurfFormData } from "../../types";
 
@@ -32,16 +36,10 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
     name: "",
     description: "",
     category: "", // Will be set to first category ID when categories load
-    location: {
-      address: "",
-      city: "",
-      state: "",
-      country: "India",
-      zipCode: "",
-    },
+    location: "", // Single address field
     pricing: {
       hourlyRate: 0,
-      currency: "USD",
+      currency: "INR",
     },
     startTime: "06:00",
     endTime: "22:00",
@@ -50,11 +48,20 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Category options - dynamic from Redux state
-  const categoryOptions = categories.map(category => ({
-    label: category.name,
-    value: category.id
-  }));
+  // Only use backend categories - no fallback with fake UUIDs
+  const categoryOptions =
+    categories.length > 0
+      ? categories.map((category) => ({
+          label: category.name,
+          value: category.id,
+        }))
+      : [
+          {
+            label: "No categories available - Create categories first",
+            value: "",
+            disabled: true,
+          },
+        ];
 
   // Slot interval options
   const slotIntervalOptions = [
@@ -73,41 +80,36 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
 
   useEffect(() => {
     if (editMode && turfToEdit && visible) {
-      setFormData({
-        name: turfToEdit.name,
-        description: turfToEdit.description,
-        category: turfToEdit.category,
-        location: {
-          address: turfToEdit.location.address,
-          city: turfToEdit.location.city,
-          state: turfToEdit.location.state,
-          country: turfToEdit.location.zipCode ? "India" : "India",
-          zipCode: turfToEdit.location.zipCode || "",
-        },
+      const formDataToSet = {
+        name: turfToEdit.name || "",
+        description: turfToEdit.description || "",
+        category: turfToEdit.categoryId || "", // Use categoryId for the form
+        location: turfToEdit.location || "", // Use location string directly
         pricing: {
-          hourlyRate: turfToEdit.pricing.hourlyRate,
-          currency: turfToEdit.pricing.currency,
+          hourlyRate:
+            turfToEdit.pricing?.hourlyRate || turfToEdit.pricePerHour || 0, // TurfService adds pricing.hourlyRate
+          currency: turfToEdit.pricing?.currency || "INR",
         },
-        startTime: "06:00", // Default values since these aren't in the Turf type
-        endTime: "22:00",
+        startTime: turfToEdit.openTime
+          ? turfToEdit.openTime.substring(0, 5)
+          : "06:00", // Convert HH:MM:SS to HH:MM
+        endTime: turfToEdit.closeTime
+          ? turfToEdit.closeTime.substring(0, 5)
+          : "22:00", // Convert HH:MM:SS to HH:MM
         slotInterval: 60,
-      });
+      };
+
+      setFormData(formDataToSet);
     } else if (!editMode && visible) {
       // Reset form for new turf
       setFormData({
         name: "",
         description: "",
-        category: "",
-        location: {
-          address: "",
-          city: "",
-          state: "",
-          country: "India",
-          zipCode: "",
-        },
+        category: "", // Will be set by separate useEffect when categories load
+        location: "", // Single address field
         pricing: {
           hourlyRate: 0,
-          currency: "USD",
+          currency: "INR",
         },
         startTime: "06:00",
         endTime: "22:00",
@@ -117,15 +119,23 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
     setErrors({});
   }, [editMode, turfToEdit, visible]);
 
-  // Set default category when categories are loaded
+  // Set default category when categories are loaded - separate useEffect
   useEffect(() => {
-    if (categories.length > 0 && !editMode && formData.category === "") {
-      setFormData(prev => ({
-        ...prev,
-        category: categories[0].id
-      }));
+    if (
+      categories.length > 0 &&
+      !editMode &&
+      formData.category === "" &&
+      visible
+    ) {
+      const firstCategoryId = categories[0]?.id;
+      if (firstCategoryId) {
+        setFormData((prev) => ({
+          ...prev,
+          category: firstCategoryId,
+        }));
+      }
     }
-  }, [categories, editMode, formData.category]);
+  }, [categories, editMode, formData.category, visible]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -138,16 +148,20 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
       newErrors.description = "Description is required";
     }
 
-    if (!formData.location.address.trim()) {
-      newErrors.address = "Address is required";
+    if (!formData.category || formData.category === "") {
+      newErrors.category = "Please select a sport category";
     }
 
-    if (!formData.location.city.trim()) {
-      newErrors.city = "City is required";
+    // Check if valid backend categories are available
+    if (categories.length === 0) {
+      newErrors.category =
+        "No categories available. Please create categories first.";
     }
 
-    if (!formData.location.state.trim()) {
-      newErrors.state = "State is required";
+    if (!formData.location.trim()) {
+      newErrors.location = "Address is required";
+    } else if (formData.location.trim().length < 10) {
+      newErrors.location = "Please enter a complete address";
     }
 
     if (formData.pricing.hourlyRate <= 0) {
@@ -168,25 +182,19 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
     }
 
     try {
+      // Format data for backend CreateTurfRequest
       const turfData = {
         name: formData.name,
         description: formData.description,
-        sportType: formData.category,
-        addressLine1: formData.location.address,
-        city: formData.location.city,
-        state: formData.location.state,
-        country: formData.location.country,
-        postalCode: formData.location.zipCode,
-        startTime: formData.startTime,
-        endTime: formData.endTime,
-        slotInterval: formData.slotInterval,
-        pricePerSlot: formData.pricing.hourlyRate,
+        categoryId: formData.category, // Backend expects categoryId
+        location: formData.location.trim(), // Use location string directly
+        pricePerHour: formData.pricing.hourlyRate, // Backend expects pricePerHour
+        openTime: `${formData.startTime}:00`, // Convert HH:MM to HH:MM:SS for backend
+        closeTime: `${formData.endTime}:00`, // Convert HH:MM to HH:MM:SS for backend
       };
 
       if (editMode && turfToEdit) {
-        await dispatch(
-          updateTurf({ id: turfToEdit.id, turfData })
-        ).unwrap();
+        await dispatch(updateTurf({ id: turfToEdit.id, turfData })).unwrap();
         dispatch(
           addToast({
             type: "success",
@@ -194,6 +202,8 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
             message: "Turf updated successfully",
           })
         );
+        // Refresh the turfs list
+        dispatch(fetchTurfs(undefined));
       } else {
         await dispatch(createTurf(turfData)).unwrap();
         dispatch(
@@ -203,6 +213,8 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
             message: "Turf created successfully",
           })
         );
+        // Refresh the turfs list
+        dispatch(fetchTurfs(undefined));
       }
 
       handleClose();
@@ -255,7 +267,10 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
     required = false
   ) => (
     <div className="field">
-      <label htmlFor={field} className="block text-sm font-medium text-gray-700 mb-1">
+      <label
+        htmlFor={field}
+        className="block text-sm font-medium text-gray-700 mb-1"
+      >
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       {component}
@@ -320,14 +335,23 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
         {renderField(
           "Sport Category",
           "category",
-          <Dropdown
-            id="category"
-            value={formData.category}
-            options={categoryOptions}
-            onChange={(e) => handleInputChange("category", e.value)}
-            className="w-full"
-            placeholder="Select sport category"
-          />,
+          <>
+            <Dropdown
+              id="category"
+              value={formData.category}
+              options={categoryOptions}
+              onChange={(e) => handleInputChange("category", e.value)}
+              className="w-full"
+              placeholder="Select sport category"
+              disabled={categories.length === 0}
+            />
+            {categories.length === 0 && (
+              <small className="text-red-500 mt-1 block">
+                No categories available. Please create categories first through
+                the admin panel.
+              </small>
+            )}
+          </>,
           true
         )}
 
@@ -344,63 +368,18 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
           />,
           true
         )}
-
-        {/* Location Information */}
-        <div className="md:col-span-2">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3 mt-4">
-            Location Information
-          </h3>
-        </div>
-
         {renderField(
           "Address",
-          "address",
-          <InputText
-            id="address"
-            value={formData.location.address}
-            onChange={(e) => handleInputChange("location.address", e.target.value)}
-            className={`w-full ${errors.address ? "p-invalid" : ""}`}
-            placeholder="Enter address"
+          "location",
+          <InputTextarea
+            id="location"
+            value={formData.location}
+            onChange={(e) => handleInputChange("location", e.target.value)}
+            className={`w-full ${errors.location ? "p-invalid" : ""}`}
+            rows={3}
+            placeholder="Enter complete address (e.g., 123 Main Street, City, State, ZIP Code)"
           />,
           true
-        )}
-
-        {renderField(
-          "City",
-          "city",
-          <InputText
-            id="city"
-            value={formData.location.city}
-            onChange={(e) => handleInputChange("location.city", e.target.value)}
-            className={`w-full ${errors.city ? "p-invalid" : ""}`}
-            placeholder="Enter city"
-          />,
-          true
-        )}
-
-        {renderField(
-          "State",
-          "state",
-          <InputText
-            id="state"
-            value={formData.location.state}
-            onChange={(e) => handleInputChange("location.state", e.target.value)}
-            className={`w-full ${errors.state ? "p-invalid" : ""}`}
-            placeholder="Enter state"
-          />,
-          true
-        )}
-
-        {renderField(
-          "Postal Code",
-          "zipCode",
-          <InputText
-            id="zipCode"
-            value={formData.location.zipCode}
-            onChange={(e) => handleInputChange("location.zipCode", e.target.value)}
-            className="w-full"
-            placeholder="Enter postal code"
-          />
         )}
 
         {/* Pricing & Timing */}
@@ -416,7 +395,9 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
           <InputNumber
             id="hourlyRate"
             value={formData.pricing.hourlyRate}
-            onValueChange={(e) => handleInputChange("pricing.hourlyRate", e.value)}
+            onValueChange={(e) =>
+              handleInputChange("pricing.hourlyRate", e.value)
+            }
             className={`w-full ${errors.hourlyRate ? "p-invalid" : ""}`}
             placeholder="Enter hourly rate"
             min={0}
@@ -478,4 +459,4 @@ const TurfFormModal: React.FC<TurfFormModalProps> = ({
   );
 };
 
-export default TurfFormModal; 
+export default TurfFormModal;

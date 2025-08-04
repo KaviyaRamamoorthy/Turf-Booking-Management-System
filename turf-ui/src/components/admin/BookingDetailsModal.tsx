@@ -259,7 +259,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               </div>
               <div>
                 <span className="text-gray-600">Category:</span>
-                <p className="font-medium capitalize">{selectedBooking.turf.category}</p>
+                <p className="font-medium capitalize">{typeof selectedBooking.turf.category === 'string' ? selectedBooking.turf.category : selectedBooking.turf.category?.name}</p>
               </div>
               <div>
                 <span className="text-gray-600">Location:</span>

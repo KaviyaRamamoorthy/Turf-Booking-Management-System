@@ -17,7 +17,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 /**
  * Security configuration for JWT-based authentication and role-based access.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @Configuration
 @EnableMethodSecurity
@@ -36,6 +36,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                    "/api/auth/send-otp",
                     "/api/auth/register",
                     "/api/auth/login",
                     "/api/auth/verify-otp",

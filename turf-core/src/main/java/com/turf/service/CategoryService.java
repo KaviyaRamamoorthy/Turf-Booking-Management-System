@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Service interface for category-related operations.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public interface CategoryService {
     CategoryDto getCategoryById(UUID id);

@@ -3,14 +3,17 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import adminBookingService, {
   type AdminBookingResponse,
   type AdminBookingFilters,
+  type StatusCounts,
 } from "../../services/adminBookingService";
 
 // State interface
 export interface AdminBookingState {
   bookings: AdminBookingResponse[];
   selectedBooking: AdminBookingResponse | null;
+  statusCounts: StatusCounts | null;
   isLoading: boolean;
   error: string | null;
+  isError: boolean;
   filters: AdminBookingFilters;
   total: number;
   page: number;
@@ -87,11 +90,30 @@ export const rejectBooking = createAsyncThunk(
   }
 );
 
+export const fetchStatusCounts = createAsyncThunk(
+  "adminBooking/fetchStatusCounts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await adminBookingService.getStatusCounts();
+      if (!response.success) {
+        return rejectWithValue(response.message || "Failed to fetch status counts");
+      }
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to fetch status counts"
+      );
+    }
+  }
+);
+
 const initialState: AdminBookingState = {
   bookings: [],
   selectedBooking: null,
+  statusCounts: null,
   isLoading: false,
   error: null,
+  isError: false,
   filters: {},
   total: 0,
   page: 1,
@@ -128,6 +150,7 @@ const adminBookingSlice = createSlice({
       .addCase(fetchAllBookings.pending, (state) => {
         state.isLoading = true;
         state.error = null;
+        state.isError = false;
       })
       .addCase(fetchAllBookings.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -141,6 +164,7 @@ const adminBookingSlice = createSlice({
       .addCase(fetchAllBookings.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+        state.isError = true;
       })
       // Fetch booking details
       .addCase(fetchBookingDetails.pending, (state) => {
@@ -197,6 +221,20 @@ const adminBookingSlice = createSlice({
         state.error = null;
       })
       .addCase(rejectBooking.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      // Fetch status counts
+      .addCase(fetchStatusCounts.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchStatusCounts.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.statusCounts = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchStatusCounts.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

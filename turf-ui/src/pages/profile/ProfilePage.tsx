@@ -10,10 +10,8 @@ import {
   updateUserProfile,
   fetchUserProfile,
 } from "../../store/slices/userSlice";
-import { updateUser } from "../../store/slices/authSlice";
 import CustomInput from "../../components/common/CustomInput";
 import CustomEmailInput from "../../components/common/CustomEmailInput";
-import CustomDropdown from "../../components/common/CustomDropdown";
 import Breadcrumb from "../../components/common/Breadcrumb";
 
 const ProfilePage: React.FC = () => {
@@ -26,85 +24,36 @@ const ProfilePage: React.FC = () => {
 
   const [formData, setFormData] = useState({
     fullName: "",
-    pincode: "",
-    state: "",
-    city: "",
-    email: "",
     phoneNumber: "",
   });
 
   const [validationErrors, setValidationErrors] = useState<{
     fullName?: string;
-    pincode?: string;
-    state?: string;
-    city?: string;
-    email?: string;
     phoneNumber?: string;
   }>({});
 
   const [isEditing, setIsEditing] = useState(false);
 
-  // Indian states for dropdown
-  const states = [
-    "Andhra Pradesh",
-    "Arunachal Pradesh",
-    "Assam",
-    "Bihar",
-    "Chhattisgarh",
-    "Goa",
-    "Gujarat",
-    "Haryana",
-    "Himachal Pradesh",
-    "Jharkhand",
-    "Karnataka",
-    "Kerala",
-    "Madhya Pradesh",
-    "Maharashtra",
-    "Manipur",
-    "Meghalaya",
-    "Mizoram",
-    "Nagaland",
-    "Odisha",
-    "Punjab",
-    "Rajasthan",
-    "Sikkim",
-    "Tamil Nadu",
-    "Telangana",
-    "Tripura",
-    "Uttar Pradesh",
-    "Uttarakhand",
-    "West Bengal",
-  ];
-
   // Load user profile data
   useEffect(() => {
-    if (user) {
-      // If we have user data from auth, use it to populate the form
-      setFormData({
-        fullName: user.name || "",
-        pincode: user.address?.pincode || "",
-        state: user.address?.state || "",
-        city: user.address?.city || "",
-        email: user.email || "",
-        phoneNumber: user.phone || "",
-      });
-    }
     dispatch(fetchUserProfile());
-  }, [dispatch, user]);
+  }, [dispatch]);
 
   // Update form data when profile is loaded
   useEffect(() => {
     if (profile) {
       setFormData({
-        fullName: profile.name || "",
-        pincode: profile.address?.pincode || "",
-        state: profile.address?.state || "",
-        city: profile.address?.city || "",
-        email: profile.email || "",
-        phoneNumber: profile.phone || "",
+        fullName: profile.fullName || "",
+        phoneNumber: profile.phoneNumber || "",
+      });
+    } else if (user) {
+      // Fallback to auth user data if profile not loaded
+      setFormData({
+        fullName: user.fullName || user.name || "",
+        phoneNumber: user.phoneNumber || user.phone || "",
       });
     }
-  }, [profile]);
+  }, [profile, user]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -119,26 +68,8 @@ const ProfilePage: React.FC = () => {
 
     if (!formData.fullName.trim()) {
       errors.fullName = "Full name is required";
-    }
-
-    if (!formData.pincode.trim()) {
-      errors.pincode = "Pincode is required";
-    } else if (!/^\d{6}$/.test(formData.pincode)) {
-      errors.pincode = "Pincode must be 6 digits";
-    }
-
-    if (!formData.state) {
-      errors.state = "State is required";
-    }
-
-    if (!formData.city.trim()) {
-      errors.city = "City is required";
-    }
-
-    if (!formData.email.trim()) {
-      errors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
+    } else if (formData.fullName.trim().length < 2) {
+      errors.fullName = "Full name must be at least 2 characters";
     }
 
     if (!formData.phoneNumber.trim()) {
@@ -151,50 +82,28 @@ const ProfilePage: React.FC = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
 
     if (!validateForm()) {
       return;
     }
 
     try {
-      const profileData = {
-        name: formData.fullName,
-        phone: formData.phoneNumber,
-        address: {
-          pincode: formData.pincode,
-          state: formData.state,
-          city: formData.city,
-        },
-        preferences: {
-          theme: "light" as const,
-          language: "en" as const,
-          notifications: true,
-        },
-      };
-
-      const updatedUser = await dispatch(
-        updateUserProfile(profileData)
-      ).unwrap();
-      // Also update the auth state
-      dispatch(updateUser(updatedUser));
+      await dispatch(updateUserProfile(formData)).unwrap();
       setIsEditing(false);
+      setValidationErrors({});
     } catch (error) {
       console.error("Profile update failed:", error);
     }
   };
 
   const handleCancel = () => {
-    // Reset form to original values
-    if (user) {
+    // Reset form data to original values
+    if (profile) {
       setFormData({
-        fullName: user.name || "",
-        pincode: user.address?.pincode || "",
-        state: user.address?.state || "",
-        city: user.address?.city || "",
-        email: user.email || "",
-        phoneNumber: user.phone || "",
+        fullName: profile.fullName || "",
+        phoneNumber: profile.phoneNumber || "",
       });
     }
     setIsEditing(false);
@@ -202,7 +111,7 @@ const ProfilePage: React.FC = () => {
   };
 
   const breadcrumbItems = [
-    { label: "Home", path: "/dashboard/admin", isActive: false },
+    { label: "Home", path: "/home", isActive: false },
     { label: "Profile", path: "/profile", isActive: true },
   ];
 
@@ -253,7 +162,7 @@ const ProfilePage: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Full Name */}
-            <div className="md:col-span-2">
+            <div>
               <CustomInput
                 label="Full Name"
                 value={formData.fullName}
@@ -261,19 +170,6 @@ const ProfilePage: React.FC = () => {
                 placeholder="Enter your full name"
                 error={validationErrors.fullName}
                 disabled={!isEditing}
-                required
-              />
-            </div>
-
-            {/* Email */}
-            <div className="md:col-span-2">
-              <CustomEmailInput
-                label="Email Address"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder="Enter your email address"
-                error={validationErrors.email}
-                disabled={true}
                 required
               />
             </div>
@@ -293,71 +189,33 @@ const ProfilePage: React.FC = () => {
               />
             </div>
 
-            {/* Pincode */}
+            {/* Email - Read Only */}
+            <div>
+              <CustomEmailInput
+                label="Email Address"
+                value={profile?.email || user?.email || ""}
+                onChange={() => {}} // Read-only
+                placeholder="Email address"
+                disabled={true}
+                required
+              />
+              <small className="text-gray-500 text-xs mt-1 block">
+                Email address cannot be changed. Contact support if needed.
+              </small>
+            </div>
+
+            {/* User Role */}
             <div>
               <CustomInput
-                label="Pincode"
-                value={formData.pincode}
-                onChange={(e) => handleInputChange("pincode", e.target.value)}
-                placeholder="Enter your pincode"
-                error={validationErrors.pincode}
-                disabled={!isEditing}
-                required
+                label="User Role"
+                value={profile?.role || user?.role || ""}
+                onChange={() => {}} // Read-only
+                placeholder="User role"
+                disabled={true}
               />
-            </div>
-
-            {/* State */}
-            <div>
-              <CustomDropdown
-                label="State"
-                value={formData.state}
-                options={states}
-                onChange={(e) => handleInputChange("state", e.value)}
-                placeholder="Select your state"
-                error={validationErrors.state}
-                disabled={!isEditing}
-                required
-              />
-            </div>
-
-            {/* City */}
-            <div>
-              <CustomInput
-                label="City"
-                value={formData.city}
-                onChange={(e) => handleInputChange("city", e.target.value)}
-                placeholder="Enter your city"
-                error={validationErrors.city}
-                disabled={!isEditing}
-                required
-              />
-            </div>
-          </div>
-
-          {/* User Role Display */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Account Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  User Role
-                </label>
-                <p className="text-sm text-gray-600 capitalize bg-white px-3 py-2 rounded border">
-                  {user?.role || "Not specified"}
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Member Since
-                </label>
-                <p className="text-sm text-gray-600 bg-white px-3 py-2 rounded border">
-                  {user?.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString()
-                    : "Not specified"}
-                </p>
-              </div>
+              <small className="text-gray-500 text-xs mt-1 block">
+                User role cannot be changed.
+              </small>
             </div>
           </div>
         </form>

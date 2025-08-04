@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Service interface for turf-related operations.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public interface TurfService {
     TurfDto getTurfById(UUID id);

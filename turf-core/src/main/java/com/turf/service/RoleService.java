@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Service interface for role-related operations.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public interface RoleService {
     RoleDto getRoleById(UUID id);

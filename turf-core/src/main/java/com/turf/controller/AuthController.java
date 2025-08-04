@@ -25,7 +25,7 @@ import com.turf.config.JwtUtil;
 /**
  * Controller for authentication-related endpoints (register, login, OTP, password reset).
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -43,18 +43,42 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @PostMapping("/send-otp")
+    public ResponseEntity<ApiResponse<String>> sendOtp(@RequestBody OtpRequest otpRequest) {
+        if (otpRequest == null || otpRequest.getEmail() == null) {
+            throw new BadRequestException("Email is required.");
+        }
+        
+        // Check if user already exists and is verified
+        if (userService.isUserVerified(otpRequest.getEmail())) {
+            throw new BadRequestException("User with this email is already verified.");
+        }
+        
+        logger.info("Sending OTP request received for email: {}", otpRequest.getEmail());
+        otpService.generateOtp(otpRequest.getEmail(), CommonConstants.OTP_PURPOSE_SIGNUP);
+        
+        return ResponseEntity.ok(new ApiResponse<>(true, "OTP sent to email for verification.", null));
+    }
+
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<String>> register(@RequestBody UserDto userDto) {
         if (userDto == null || userDto.getEmail() == null || userDto.getPasswordHash() == null) {
             throw new BadRequestException("Email and password are required.");
         }
+        
+        // Check if user already exists
+        if (userService.getUserByEmail(userDto.getEmail()) != null) {
+            throw new BadRequestException("User with this email already exists.");
+        }
+        
+        // Save the user with verified and active status (no OTP required)
         userDto.setPasswordHash(passwordEncoder.encode(userDto.getPasswordHash()));
-        userDto.setVerified(false);
-        userDto.setActive(false);
+        userDto.setVerified(true);
+        userDto.setActive(true);
         userService.createUser(userDto);
-        otpService.generateOtp(userDto.getEmail(), CommonConstants.OTP_PURPOSE_SIGNUP);
-        logger.info("User registered: {}. OTP sent.", userDto.getEmail());
-        return ResponseEntity.ok(new ApiResponse<>(true, "Registration successful. OTP sent to email.", null));
+        
+        logger.info("User registered successfully: {}", userDto.getEmail());
+        return ResponseEntity.ok(new ApiResponse<>(true, "Registration successful. You can now login with your credentials.", null));
     }
 
     @PostMapping("/verify-otp")

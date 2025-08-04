@@ -18,6 +18,13 @@ export const MENU_ITEMS: Record<UserRole, MenuItem[]> = {
       roles: ["admin"],
     },
     {
+      id: "categories",
+      label: "Categories",
+      icon: "pi pi-tags",
+      path: "/admin/categories",
+      roles: ["admin"],
+    },
+    {
       id: "my-bookings",
       label: "My Bookings",
       icon: "pi pi-calendar",
@@ -78,6 +85,89 @@ export const MENU_ITEMS: Record<UserRole, MenuItem[]> = {
       roles: ["vendor"],
     },
   ],
+  ADMIN: [
+    {
+      id: "home",
+      label: "Home",
+      icon: "pi pi-home",
+      path: "/home",
+      roles: ["ADMIN"],
+    },
+    {
+      id: "turf-management",
+      label: "Turf Management",
+      icon: "pi pi-map-marker",
+      path: "/admin/turfs",
+      roles: ["ADMIN"],
+    },
+    {
+      id: "categories",
+      label: "Categories",
+      icon: "pi pi-tags",
+      path: "/admin/categories",
+      roles: ["ADMIN"],
+    },
+    {
+      id: "my-bookings",
+      label: "My Bookings",
+      icon: "pi pi-calendar",
+      path: "/bookings",
+      roles: ["ADMIN"],
+    },
+    {
+      id: "turf-bookings",
+      label: "Turf Bookings",
+      icon: "pi pi-calendar-plus",
+      path: "/admin/bookings",
+      roles: ["ADMIN"],
+    },
+  ],
+  CUSTOMER: [
+    {
+      id: "home",
+      label: "Home",
+      icon: "pi pi-home",
+      path: "/home",
+      roles: ["CUSTOMER"],
+    },
+    {
+      id: "my-bookings",
+      label: "My Bookings",
+      icon: "pi pi-calendar",
+      path: "/bookings",
+      roles: ["CUSTOMER"],
+    },
+  ],
+  VENDOR: [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: "pi pi-home",
+      path: "/dashboard/vendor",
+      roles: ["VENDOR"],
+    },
+    {
+      id: "my-turfs",
+      label: "My Turfs",
+      icon: "pi pi-map-marker",
+      path: "/vendor/turfs",
+      roles: ["VENDOR"],
+    },
+    {
+      id: "bookings",
+      label: "Bookings",
+      icon: "pi pi-calendar",
+      path: "/vendor/bookings",
+      roles: ["VENDOR"],
+    },
+    {
+      id: "profile",
+      label: "Profile",
+      icon: "pi pi-user",
+      path: "/profile",
+      roles: ["VENDOR"],
+    },
+  ],
 };
 
 // Public menu items (visible to all users)
@@ -105,13 +195,6 @@ export const USER_MENU_ITEMS: MenuItem[] = [
     label: "Profile",
     icon: "pi pi-user",
     path: "/profile",
-    roles: ["admin", "customer", "vendor"],
-  },
-  {
-    id: "change-password",
-    label: "Change Password",
-    icon: "pi pi-lock",
-    path: "/change-password",
     roles: ["admin", "customer", "vendor"],
   },
   {

@@ -3,7 +3,7 @@ package com.turf.exception;
 /**
  * Exception thrown when a requested resource is not found.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message) {

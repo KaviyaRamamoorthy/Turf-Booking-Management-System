@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 /**
  * Implementation of ModuleService.
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @Service
 public class ModuleServiceImpl implements ModuleService {
@@ -70,6 +70,7 @@ public class ModuleServiceImpl implements ModuleService {
     @Override
     public List<ModuleDto> getModulesByRoleNames(List<String> roleNames) {
         return roleRepository.findByNameIn(roleNames).stream()
+            .filter(role -> role.getModules() != null)
             .flatMap(role -> role.getModules().stream())
             .distinct()
             .map(module -> {

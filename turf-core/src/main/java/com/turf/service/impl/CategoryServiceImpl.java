@@ -16,7 +16,7 @@ import com.turf.service.CategoryService;
 /**
  * Implementation of CategoryService for category-related operations.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @Service
 public class CategoryServiceImpl implements CategoryService {

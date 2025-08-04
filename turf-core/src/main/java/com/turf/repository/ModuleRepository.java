@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /**
  * Repository for Module entity.
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public interface ModuleRepository extends JpaRepository<Module, UUID> {
     boolean existsByName(String name);

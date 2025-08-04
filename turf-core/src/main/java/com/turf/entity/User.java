@@ -1,18 +1,13 @@
 package com.turf.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +16,7 @@ import lombok.NoArgsConstructor;
 /**
  * Entity representing a user in the Turf Booking Platform.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @Data
 @NoArgsConstructor
@@ -30,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @Column(nullable = false)
@@ -45,11 +40,8 @@ public class User {
     @Column(nullable = false)
     private String phoneNumber;
 
-    private LocalDate dob;
-    private String doorNo;
-    private String street;
-    private String locality;
-    private String location;
+    @Column(nullable = false)
+    private String role;
 
     private boolean isVerified;
     private boolean isActive;
@@ -58,14 +50,6 @@ public class User {
     private LocalDateTime updatedAt;
 
     private String vendorApprovalStatus; // PENDING, APPROVED, REJECTED
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;
 
     // Getters and setters omitted for brevity
 
@@ -88,20 +72,8 @@ public class User {
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     
-    public LocalDate getDob() { return dob; }
-    public void setDob(LocalDate dob) { this.dob = dob; }
-    
-    public String getDoorNo() { return doorNo; }
-    public void setDoorNo(String doorNo) { this.doorNo = doorNo; }
-    
-    public String getStreet() { return street; }
-    public void setStreet(String street) { this.street = street; }
-    
-    public String getLocality() { return locality; }
-    public void setLocality(String locality) { this.locality = locality; }
-    
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
     
     public boolean isVerified() { return isVerified; }
     public void setVerified(boolean isVerified) { this.isVerified = isVerified; }
@@ -116,9 +88,6 @@ public class User {
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-
-    public Set<Role> getRoles() { return roles; }
-    public void setRoles(Set<Role> roles) { this.roles = roles; }
 
     public String getVendorApprovalStatus() { return vendorApprovalStatus; }
     public void setVendorApprovalStatus(String vendorApprovalStatus) { this.vendorApprovalStatus = vendorApprovalStatus; }

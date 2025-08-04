@@ -61,6 +61,7 @@ const LoginPage = () => {
       const loginCredentials = {
         email: formData.email,
         password: formData.password,
+        role: "ADMIN" as const,
       };
 
       await dispatch(loginUser(loginCredentials)).unwrap();
@@ -102,8 +103,9 @@ const LoginPage = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  className={`w-full ${validationErrors.email ? "p-invalid" : ""
-                    }`}
+                  className={`w-full ${
+                    validationErrors.email ? "p-invalid" : ""
+                  }`}
                   placeholder="Enter your email"
                   autoComplete="email"
                 />
@@ -125,20 +127,20 @@ const LoginPage = () => {
                 Password
               </label>
               <div className="relative w-full">
-                <div className="w-full" style={{ width: '100%' }}>
+                <div className="w-full" style={{ width: "100%" }}>
                   <Password
                     id="password"
                     value={formData.password}
                     onChange={(e) =>
                       handleInputChange("password", e.target.value)
                     }
-                    className={`!w-full full-width-password ${validationErrors.password ? "p-invalid" : ""
-                      }`}
+                    className={`!w-full full-width-password ${
+                      validationErrors.password ? "p-invalid" : ""
+                    }`}
                     placeholder="Enter your password"
                     autoComplete="current-password"
                     toggleMask
                     appendTo="self"
-
                   />
                 </div>
                 {validationErrors.password && (

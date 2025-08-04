@@ -3,7 +3,7 @@ package com.turf.util;
 /**
  * Standard API response wrapper for Turf Booking Platform.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public class ApiResponse<T> {
     private boolean success;

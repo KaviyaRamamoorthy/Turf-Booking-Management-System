@@ -21,7 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * JWT authentication filter for validating JWT tokens in requests.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {

@@ -13,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * CORS configuration for allowing cross-origin requests from frontend applications.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
@@ -25,7 +25,8 @@ public class CorsConfig implements WebMvcConfigurer {
                     "http://localhost:5173",
                     "http://localhost:3000", 
                     "http://127.0.0.1:5173",
-                    "http://127.0.0.1:3000"
+                    "http://127.0.0.1:3000",
+                    "https://turf-booking-managements.onrender.com"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
@@ -37,13 +38,18 @@ public class CorsConfig implements WebMvcConfigurer {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Allow specific origins
-        configuration.setAllowedOrigins(Arrays.asList(
-            "http://localhost:5173",
-            "http://localhost:3000",
-            "http://127.0.0.1:5173",
-            "http://127.0.0.1:3000"
-        ));
+        // Allow specific origins (temporary: allow all for testing)
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        // TODO: Replace with specific origins for production:
+        // configuration.setAllowedOrigins(Arrays.asList(
+        //     "http://localhost:5173",
+        //     "http://localhost:3000", 
+        //     "http://127.0.0.1:5173",
+        //     "http://127.0.0.1:3000",
+        //     "https://localhost:5173",
+        //     "https://localhost:3000",
+        //     "https://your-frontend-domain.com"
+        // ));
         
         // Allow all methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));

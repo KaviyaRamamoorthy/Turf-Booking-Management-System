@@ -1,9 +1,12 @@
 import { Badge } from "primereact/badge";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import React from "react";
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import turfImage from "../../assets/turf.jpg";
-import type { Turf } from "../../types";
+import type { RootState, Turf } from "../../types";
+import type { AppDispatch } from "../../store";
+import { fetchCategories } from "../../store/slices/categorySlice";
 
 interface TurfCardProps {
   turf: Turf;
@@ -18,8 +21,79 @@ const TurfCard: React.FC<TurfCardProps> = ({
   onBook,
   showBookButton = true,
 }) => {
-  const getCategoryColor = (category: string) => {
-    switch (category.toLowerCase()) {
+  // Get categories from Redux store to map categoryId to category name
+  const dispatch = useDispatch<AppDispatch>();
+  const { categories, isLoading: categoriesLoading } = useSelector(
+    (state: RootState) => state.category
+  );
+
+  // Ensure categories are loaded - only run once on mount
+  useEffect(() => {
+    if (categories.length === 0 && !categoriesLoading) {
+      console.log("TurfCard: Loading categories...");
+      dispatch(fetchCategories());
+    }
+  }, [dispatch]); // Only depend on dispatch to prevent infinite loops
+
+  // Find the category name from categoryId
+  const getCategoryName = () => {
+    if (turf.category?.name) {
+      // If category object is already populated, use it
+      return turf.category.name;
+    }
+
+    // If categories are still loading, show loading state
+    if (categoriesLoading) {
+      return "Loading...";
+    }
+
+    // Otherwise, find the category by categoryId from Redux store
+    const category = categories.find((cat) => cat.id === turf.categoryId);
+
+    return category?.name || "Unknown";
+  };
+
+  const categoryName = getCategoryName();
+
+  // Helper function to safely render location
+  const getLocationDisplay = () => {
+    // First check if locationData exists (parsed location object)
+    if (turf.locationData) {
+      const { address, city, state, zipCode } = turf.locationData;
+      const parts = [address, city, state, zipCode].filter(
+        (part) => part && part.trim() !== ""
+      );
+      return parts.join(", ") || "Location not specified";
+    }
+
+    // Fall back to location string
+    if (typeof turf.location === "string") {
+      return turf.location;
+    }
+
+    // Handle case where location is incorrectly an object (from turfSlice bug)
+    if (turf.location && typeof turf.location === "object") {
+      const locationObj = turf.location as any;
+      const parts = [
+        locationObj.address,
+        locationObj.city,
+        locationObj.state,
+        locationObj.zipCode,
+      ].filter(
+        (part) => part && typeof part === "string" && part.trim() !== ""
+      );
+      return parts.join(", ") || "Location not specified";
+    }
+
+    return "Location not specified";
+  };
+
+  console.log(turf);
+
+  const getCategoryColor = (categoryName: string | undefined) => {
+    if (!categoryName) return "contrast";
+
+    switch (categoryName.toLowerCase()) {
       case "football":
         return "success";
       case "cricket":
@@ -42,8 +116,10 @@ const TurfCard: React.FC<TurfCardProps> = ({
     }).format(amount);
   };
 
-  const getCategoryDisplayName = (category: string) => {
-    switch (category.toLowerCase()) {
+  const getCategoryDisplayName = (categoryName: string | undefined) => {
+    if (!categoryName) return "Unknown";
+
+    switch (categoryName.toLowerCase()) {
       case "football":
         return "Football";
       case "cricket":
@@ -53,9 +129,9 @@ const TurfCard: React.FC<TurfCardProps> = ({
       case "basketball":
         return "Basketball";
       case "volleyball":
-        return "Multi-Sport";
+        return "Volleyball";
       default:
-        return category;
+        return categoryName;
     }
   };
 
@@ -66,16 +142,12 @@ const TurfCard: React.FC<TurfCardProps> = ({
         alt={turf.name}
         className="w-full h-48 object-cover rounded-t-lg"
       />
-      <div className="absolute top-3 left-3">
+      <div className="absolute top-2 right-2">
         <Badge
-          value={getCategoryDisplayName(turf.category)}
-          severity={getCategoryColor(turf.category)}
+          value={getCategoryDisplayName(categoryName)}
+          severity={getCategoryColor(categoryName)}
           className="text-xs font-medium"
         />
-      </div>
-      <div className="absolute top-3 right-3 bg-white rounded-full px-2 py-1 flex items-center gap-1">
-        <i className="pi pi-star-fill text-yellow-500 text-sm"></i>
-        <span className="text-sm font-medium">{turf.rating}</span>
       </div>
     </div>
   );
@@ -105,23 +177,19 @@ const TurfCard: React.FC<TurfCardProps> = ({
       className="!border-0 !shadow-sm hover:!shadow-md transition-all duration-200 !rounded-lg !overflow-hidden"
     >
       <div className="space-y-3">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-800 mb-1">
-            {turf.name}
-          </h3>
-          <div className="flex items-center text-sm text-gray-600 mb-2">
-            <i className="pi pi-map-marker mr-1 text-gray-400"></i>
-            <span>
-              {turf.location.address}.
-            </span>
-          </div>
+        <h3 className="text-lg font-semibold text-gray-800 mb-1">
+          {turf.name}
+        </h3>
+        <div className="flex items-center text-sm text-gray-600 mb-2">
+          {getLocationDisplay()}.
         </div>
-
-        <p className="text-sm text-gray-600 line-clamp-2">{turf.description}</p>
 
         <div className="flex items-center justify-between">
           <div className="text-lg font-bold text-green-600">
-            {formatCurrency(turf.pricing.hourlyRate, turf.pricing.currency)}
+            {formatCurrency(
+              turf.pricing?.hourlyRate || 0,
+              turf.pricing?.currency || "INR"
+            )}
             <span className="text-sm font-normal text-gray-600">/hour</span>
           </div>
         </div>

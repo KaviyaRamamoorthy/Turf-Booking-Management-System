@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import TurfBookingsPage from "../../pages/admin/TurfBookingsPage";
 import type { AppDispatch } from "../../store";
-import { fetchAllBookings } from "../../store/slices/adminBookingSlice";
+import { fetchAllBookings, fetchStatusCounts } from "../../store/slices/adminBookingSlice";
 import type { RootState } from "../../types";
 import BookingDetailsModal from "./BookingDetailsModal";
 import TurfBookingsFilters from "./TurfBookingsFilters";
-import TurfBookingsHeader from "./TurfBookingsHeader";
 import TurfBookingsList from "./TurfBookingsList";
 
 const TurfBookingsContainer: React.FC = () => {
@@ -22,6 +21,7 @@ const TurfBookingsContainer: React.FC = () => {
   useEffect(() => {
     if (!isInitialized) {
       dispatch(fetchAllBookings(filters));
+      // dispatch(fetchStatusCounts());
       setIsInitialized(true);
     }
   }, [dispatch, isInitialized]);
@@ -30,6 +30,7 @@ const TurfBookingsContainer: React.FC = () => {
   useEffect(() => {
     if (isInitialized) {
       dispatch(fetchAllBookings(filters));
+      // dispatch(fetchStatusCounts());
     }
   }, [dispatch, filters, isInitialized]);
 
@@ -43,13 +44,12 @@ const TurfBookingsContainer: React.FC = () => {
 
   return (
     <>
-      <TurfBookingsPage>
-        <div className="space-y-6">
-          <TurfBookingsHeader />
-          <TurfBookingsFilters onFilterChange={handleFilterChange} />
-          <TurfBookingsList />
-        </div>
-      </TurfBookingsPage>
+              <TurfBookingsPage>
+          <div className="space-y-6">
+            <TurfBookingsFilters onFilterChange={handleFilterChange} />
+            <TurfBookingsList />
+          </div>
+        </TurfBookingsPage>
 
       <BookingDetailsModal
         visible={isModalVisible}

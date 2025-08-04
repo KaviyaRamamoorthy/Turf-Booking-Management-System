@@ -35,12 +35,12 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
     initializeAuth();
   }, [dispatch, isAuthenticated]);
 
-  // Fetch categories when user is authenticated and categories are not loaded
+  // Fetch categories when user is authenticated - only run when auth status changes
   useEffect(() => {
     if (isAuthenticated && categories.length === 0) {
       dispatch(fetchCategories());
     }
-  }, [dispatch, isAuthenticated, categories.length]);
+  }, [dispatch, isAuthenticated]); // Removed categories.length to prevent infinite loops
 
   return <>{children}</>;
 };

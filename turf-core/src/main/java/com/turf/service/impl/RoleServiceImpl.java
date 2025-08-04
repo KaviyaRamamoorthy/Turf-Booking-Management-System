@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * Implementation of RoleService for role-related operations.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @Service
 public class RoleServiceImpl implements RoleService {

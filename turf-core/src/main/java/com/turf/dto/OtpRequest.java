@@ -3,7 +3,7 @@ package com.turf.dto;
 /**
  * DTO for OTP verification and password reset requests.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public class OtpRequest {
     private String email;

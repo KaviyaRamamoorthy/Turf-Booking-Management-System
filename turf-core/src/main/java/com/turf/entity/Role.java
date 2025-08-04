@@ -3,7 +3,9 @@ package com.turf.entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -12,7 +14,7 @@ import java.util.Set;
 /**
  * Entity representing a role in the Turf Booking Platform.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @Data
 @NoArgsConstructor
@@ -21,7 +23,7 @@ import java.util.Set;
 @Table(name = "roles")
 public class Role {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @Column(nullable = false, unique = true)
@@ -33,6 +35,7 @@ public class Role {
         joinColumns = @JoinColumn(name = "role_id"),
         inverseJoinColumns = @JoinColumn(name = "module_id")
     )
+    @EqualsAndHashCode.Exclude
     private Set<Module> modules;
 
     public Set<Module> getModules() { return modules; }

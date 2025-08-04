@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 /**
  * DTO for authentication requests (login/register).
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @Data
 @NoArgsConstructor

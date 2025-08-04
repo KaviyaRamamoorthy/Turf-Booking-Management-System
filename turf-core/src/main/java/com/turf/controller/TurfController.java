@@ -31,11 +31,11 @@ import com.turf.util.ApiResponse;
 /**
  * Controller for turf management endpoints (vendor only).
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @RestController
 @RequestMapping("/api/turfs")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
 public class TurfController {
     private static final Logger logger = LoggerFactory.getLogger(TurfController.class);
 

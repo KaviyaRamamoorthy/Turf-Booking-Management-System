@@ -14,7 +14,7 @@ import java.util.function.Function;
 /**
  * Utility class for generating and validating JWT tokens.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @Component
 public class JwtUtil {

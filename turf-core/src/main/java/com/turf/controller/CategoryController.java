@@ -18,7 +18,7 @@ import java.util.UUID;
 /**
  * Controller for category management endpoints (admin only).
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 @RestController
 @RequestMapping("/api/categories")

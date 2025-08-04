@@ -20,14 +20,14 @@ const Header: React.FC = () => {
     switch (pathname) {
       case "/bookings":
         return "My Bookings";
-      case "/profile":
-        return "Profile";
-      case "/turfs":
-        return "Browse Turfs";
+      case "/admin/categories":
+        return "Category Management";
+      case "/admin/turfs":
+        return "Turf Management";
       case "/dashboard/admin":
         return "Admin Dashboard";
-      case "/dashboard/customer":
-        return "Customer Dashboard";
+      case "/admin/bookings":
+        return "Turf Bookings";
       case "/dashboard/vendor":
         return "Vendor Dashboard";
       default:

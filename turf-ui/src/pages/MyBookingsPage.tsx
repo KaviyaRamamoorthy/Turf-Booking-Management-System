@@ -37,13 +37,13 @@ const MyBookingsPage: React.FC = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  // Status options for filter dropdown
+  // Status options for filter dropdown (matching backend values)
   const statusOptions = [
     { label: "All Bookings", value: "" },
-    { label: "Pending", value: "pending" },
-    { label: "Confirmed", value: "confirmed" },
-    { label: "Cancelled", value: "cancelled" },
-    { label: "Completed", value: "completed" },
+    { label: "Pending", value: "PENDING" },
+    { label: "Confirmed", value: "CONFIRMED" },
+    { label: "Cancelled", value: "CANCELLED" },
+    { label: "Completed", value: "COMPLETED" },
   ];
 
   useEffect(() => {
@@ -51,11 +51,25 @@ const MyBookingsPage: React.FC = () => {
     loadBookings();
   }, [dispatch]);
 
+  useEffect(() => {
+    // Reload bookings when filters change
+    loadBookings();
+  }, [statusFilter, dateFilter]);
+
   const loadBookings = async () => {
     try {
-      // In a real app, this would be dispatch(fetchBookings())
-      // For now, we'll use the service directly to get more realistic data
-      dispatch(fetchBookings());
+      console.log("🔄 Loading user bookings...");
+      
+      // Build filters for API call
+      const apiFilters: any = {};
+      if (statusFilter) apiFilters.status = statusFilter;
+      if (dateFilter) {
+        const dateStr = dateFilter.toISOString().split('T')[0];
+        apiFilters.startDate = dateStr;
+        apiFilters.endDate = dateStr;
+      }
+      
+      dispatch(fetchBookings(apiFilters));
     } catch (error) {
       console.error("Error loading bookings:", error);
     }
@@ -67,7 +81,7 @@ const MyBookingsPage: React.FC = () => {
       return false;
     }
     if (dateFilter) {
-      const bookingDate = new Date(booking.date);
+      const bookingDate = new Date(booking.bookingDate);
       const filterDate = new Date(dateFilter);
       if (bookingDate.toDateString() !== filterDate.toDateString()) {
         return false;
@@ -79,14 +93,14 @@ const MyBookingsPage: React.FC = () => {
   // Group bookings by upcoming and past
   const now = new Date();
   const upcomingBookings = filteredBookings.filter(
-    (booking) => new Date(booking.date) >= now
+    (booking) => new Date(booking.bookingDate) >= now
   );
   const pastBookings = filteredBookings.filter(
-    (booking) => new Date(booking.date) < now
+    (booking) => new Date(booking.bookingDate) < now
   );
 
   const getStatusSeverity = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "confirmed":
         return "success";
       case "pending":
@@ -110,7 +124,7 @@ const MyBookingsPage: React.FC = () => {
   };
 
   const dateBodyTemplate = (rowData: any) => {
-    const date = new Date(rowData.date);
+    const date = new Date(rowData.bookingDate);
     return (
       <div>
         <div className="font-medium">
@@ -126,8 +140,25 @@ const MyBookingsPage: React.FC = () => {
   };
 
   const timeBodyTemplate = (rowData: any) => {
+    // Handle time format from backend (HH:MM:SS) and show as HH:MM
+    const startTime = rowData.startTime?.substring(0, 5) || "N/A";
+    const endTime = rowData.endTime?.substring(0, 5) || "N/A";
     return (
-      <div className="font-medium">{`${rowData.timeSlot?.startTime}- ${rowData.timeSlot.endTime}`}</div>
+      <div className="font-medium">{`${startTime} - ${endTime}`}</div>
+    );
+  };
+
+  const turfBodyTemplate = (rowData: any) => {
+    return (
+      <div>
+        <div className="font-medium">{rowData.turfName || "Unknown Turf"}</div>
+        {rowData.turfLocation && (
+          <div className="text-sm text-gray-600">{rowData.turfLocation}</div>
+        )}
+        {rowData.categoryName && (
+          <div className="text-xs text-blue-600">{rowData.categoryName}</div>
+        )}
+      </div>
     );
   };
 
@@ -140,6 +171,9 @@ const MyBookingsPage: React.FC = () => {
   };
 
   const actionBodyTemplate = (rowData: any) => {
+    const canCancel = rowData.status === "PENDING" || rowData.status === "CONFIRMED";
+    const isPast = new Date(rowData.bookingDate) < new Date();
+    
     return (
       <div className="flex gap-2">
         <Button
@@ -149,6 +183,17 @@ const MyBookingsPage: React.FC = () => {
           tooltip="View Details"
           tooltipOptions={{ position: "top" }}
         />
+        {canCancel && !isPast && (
+          <Button
+            icon="pi pi-times"
+            className="p-button-rounded p-button-text p-button-sm p-button-danger"
+            onClick={() => handleCancelBooking(rowData)}
+            tooltip="Cancel Booking"
+            tooltipOptions={{ position: "top" }}
+            loading={actionLoading === rowData.id}
+            disabled={actionLoading !== null}
+          />
+        )}
       </div>
     );
   };
@@ -197,6 +242,39 @@ const MyBookingsPage: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header with Filters */}
+      <Card>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label htmlFor="status-filter" className="text-sm font-medium text-gray-600">
+              Status:
+            </label>
+            <Dropdown
+              id="status-filter"
+              value={statusFilter}
+              options={statusOptions}
+              onChange={(e) => setStatusFilter(e.value)}
+              placeholder="All Status"
+              className="w-40"
+            />
+          </div>
+          
+          {(statusFilter || dateFilter) && (
+            <Button
+              label="Clear Filters"
+              icon="pi pi-times"
+              onClick={handleClearFilters}
+              className="!bg-green-500 !border-green-500 hover:!bg-green-600 disabled:!bg-green-400"
+              />
+          )}
+          
+          
+          <div className="text-sm text-gray-600">
+            Showing {filteredBookings.length} of {bookings.length} bookings
+          </div>
+        </div>
+      </Card>
+
       {/* Upcoming Bookings */}
       {upcomingBookings.length > 0 && (
         <Card title="Upcoming Bookings">
@@ -209,15 +287,20 @@ const MyBookingsPage: React.FC = () => {
             emptyMessage="No upcoming bookings found"
           >
             <Column field="id" header="Booking ID" style={{ width: "12%" }} />
-            <Column field="turfId" header="Turf" style={{ width: "20%" }} />
+            <Column 
+              field="turfName" 
+              header="Turf" 
+              body={turfBodyTemplate}
+              style={{ width: "20%" }} 
+            />
             <Column
-              field="date"
+              field="bookingDate"
               header="Date"
               body={dateBodyTemplate}
               style={{ width: "15%" }}
             />
             <Column
-              field="timeSlot"
+              field="startTime"
               header="Time"
               body={timeBodyTemplate}
               style={{ width: "13%" }}
@@ -255,15 +338,20 @@ const MyBookingsPage: React.FC = () => {
             emptyMessage="No past bookings found"
           >
             <Column field="id" header="Booking ID" style={{ width: "12%" }} />
-            <Column field="turfId" header="Turf" style={{ width: "20%" }} />
+            <Column 
+              field="turfName" 
+              header="Turf" 
+              body={turfBodyTemplate}
+              style={{ width: "20%" }} 
+            />
             <Column
-              field="date"
+              field="bookingDate"
               header="Date"
               body={dateBodyTemplate}
               style={{ width: "15%" }}
             />
             <Column
-              field="timeSlot"
+              field="startTime"
               header="Time"
               body={timeBodyTemplate}
               style={{ width: "13%" }}
@@ -343,14 +431,14 @@ const MyBookingsPage: React.FC = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Date:</span>
                     <span className="font-medium">
-                      {new Date(selectedBooking.date).toLocaleDateString()}
+                      {new Date(selectedBooking.bookingDate).toLocaleDateString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Time:</span>
                     <span className="font-medium">
-                      {selectedBooking.timeSlot?.startTime} -{" "}
-                      {selectedBooking.timeSlot?.endTime}
+                      {selectedBooking.startTime?.substring(0, 5)} -{" "}
+                      {selectedBooking.endTime?.substring(0, 5)}
                     </span>
                   </div>
                 </div>
@@ -386,13 +474,25 @@ const MyBookingsPage: React.FC = () => {
               <h4 className="font-semibold text-gray-700 mb-2">Turf Details</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Turf ID:</span>
-                  <span className="font-medium">{selectedBooking.turfId}</span>
+                  <span className="text-gray-600">Turf Name:</span>
+                  <span className="font-medium">{selectedBooking.turfName || "N/A"}</span>
                 </div>
-                {selectedBooking.notes && (
-                  <div>
-                    <span className="text-gray-600 block mb-1">Notes:</span>
-                    <span className="font-medium">{selectedBooking.notes}</span>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Location:</span>
+                  <span className="font-medium">{selectedBooking.turfLocation || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Category:</span>
+                  <span className="font-medium">{selectedBooking.categoryName || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Customer:</span>
+                  <span className="font-medium">{selectedBooking.customerName || "N/A"}</span>
+                </div>
+                {selectedBooking.customerEmail && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Email:</span>
+                    <span className="font-medium">{selectedBooking.customerEmail}</span>
                   </div>
                 )}
               </div>

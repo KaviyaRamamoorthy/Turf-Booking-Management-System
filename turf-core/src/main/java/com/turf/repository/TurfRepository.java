@@ -7,7 +7,7 @@ import java.util.UUID;
 /**
  * Repository for Turf entity.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public interface TurfRepository extends JpaRepository<Turf, UUID> {
 } 

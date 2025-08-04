@@ -5,7 +5,7 @@ import java.util.UUID;
 /**
  * Data Transfer Object for Role entity.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public class RoleDto {
     private UUID id;

@@ -1,28 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { UserState, User, ProfileForm } from "../../types";
+import { authService } from "../../services/authService";
 
 // Async thunks
 export const fetchUserProfile = createAsyncThunk(
   "user/fetchProfile",
   async (_, { rejectWithValue }) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      // Mock user profile with ISO string dates
-      const user: User = {
-        id: "2",
-        email: "customer@turf.com",
-        name: "John Customer",
-        phone: "+1234567891",
-        role: "customer",
-        preferences: {
-          theme: "light",
-          language: "en",
-          notifications: true,
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      const user = await authService.getCurrentUser();
       return user;
     } catch (error) {
       return rejectWithValue(
@@ -36,18 +22,7 @@ export const updateUserProfile = createAsyncThunk(
   "user/updateProfile",
   async (profileData: ProfileForm, { rejectWithValue }) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // Mock updated user profile with ISO string dates
-      const updatedUser: User = {
-        id: "2",
-        email: "customer@turf.com",
-        name: profileData.name,
-        phone: profileData.phone,
-        role: "customer",
-        preferences: profileData.preferences,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      const updatedUser = await authService.updateProfile(profileData);
       return updatedUser;
     } catch (error) {
       return rejectWithValue(

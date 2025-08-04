@@ -26,6 +26,7 @@ import CustomerDashboard from "./pages/dashboard/CustomerDashboard";
 import ProfilePage from "./pages/profile/ProfilePage";
 import HomePage from "./pages/HomePage";
 import TurfManagementContainer from "./components/admin/TurfManagementContainer";
+import CategoryManagementContainer from "./components/admin/CategoryManagementContainer";
 import TurfBookingsContainer from "./components/admin/TurfBookingsContainer";
 import MyBookingsPage from "./pages/MyBookingsPage";
 
@@ -58,138 +59,145 @@ const App: React.FC = () => {
         <AuthInitializer>
           <Router>
             <Routes>
-            {/* Public Routes - No Layout */}
-            <Route path="/" element={<Navigate to="/auth/login" replace />} />
-            <Route path="/auth/login" element={<LoginPage />} />
-            <Route path="/auth/register" element={<RegisterPage />} />
+              {/* Public Routes - No Layout */}
+              <Route path="/" element={<Navigate to="/auth/login" replace />} />
+              <Route path="/auth/login" element={<LoginPage />} />
+              <Route path="/auth/register" element={<RegisterPage />} />
 
-            {/* Change Password Route - Protected but No Layout */}
-            <Route
-              path="/change-password"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "customer", "vendor"]}>
-                  <ChangePasswordPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* Home Route - Protected with Layout */}
+              <Route
+                path="/home"
+                element={
+                  <ProtectedRoute
+                    requiredRoles={["admin", "customer", "vendor"]}
+                  >
+                    <AppLayout>
+                      <HomePage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Home Route - Protected with Layout */}
-            <Route
-              path="/home"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "customer", "vendor"]}>
-                  <AppLayout>
-                    <HomePage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
+              {/* Protected Routes - With Layout */}
+              <Route
+                path="/dashboard/admin"
+                element={
+                  <ProtectedRoute requiredRoles={["admin"]}>
+                    <AppLayout>
+                      <AdminDashboard />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/customer"
+                element={
+                  <ProtectedRoute requiredRoles={["customer"]}>
+                    <AppLayout>
+                      <CustomerDashboard />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/vendor"
+                element={
+                  <ProtectedRoute requiredRoles={["vendor"]}>
+                    <AppLayout>
+                      <VendorDashboard />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Protected Routes - With Layout */}
-            <Route
-              path="/dashboard/admin"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AppLayout>
-                    <AdminDashboard />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/customer"
-              element={
-                <ProtectedRoute requiredRoles={["customer"]}>
-                  <AppLayout>
-                    <CustomerDashboard />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/vendor"
-              element={
-                <ProtectedRoute requiredRoles={["vendor"]}>
-                  <AppLayout>
-                    <VendorDashboard />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute
+                    requiredRoles={["admin", "customer", "vendor"]}
+                  >
+                    <AppLayout>
+                      <ProfilePage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "customer", "vendor"]}>
-                  <AppLayout>
-                    <ProfilePage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/admin/turfs"
+                element={
+                  <ProtectedRoute requiredRoles={["admin"]}>
+                    <AppLayout>
+                      <TurfManagementContainer />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/admin/turfs"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AppLayout>
-                    <TurfManagementContainer />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/admin/categories"
+                element={
+                  <ProtectedRoute requiredRoles={["admin"]}>
+                    <AppLayout>
+                      <CategoryManagementContainer />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/admin/bookings"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AppLayout>
-                    <TurfBookingsContainer />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-               <Route
-              path="/admin/*"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AppLayout>
-                    <div className="text-center py-12">
-                      <h1 className="text-2xl font-bold text-gray-800 mb-4">
-                        Admin Panel
-                      </h1>
-                      <p className="text-gray-600">
-                        Admin features coming soon...
-                      </p>
-                    </div>
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/admin/bookings"
+                element={
+                  <ProtectedRoute requiredRoles={["admin"]}>
+                    <AppLayout>
+                      <TurfBookingsContainer />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/*"
+                element={
+                  <ProtectedRoute requiredRoles={["admin"]}>
+                    <AppLayout>
+                      <div className="text-center py-12">
+                        <h1 className="text-2xl font-bold text-gray-800 mb-4">
+                          Admin Panel
+                        </h1>
+                        <p className="text-gray-600">
+                          Admin features coming soon...
+                        </p>
+                      </div>
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/bookings"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "customer"]}>
-                  <AppLayout>
-                    <MyBookingsPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/bookings"
+                element={
+                  <ProtectedRoute requiredRoles={["admin", "customer"]}>
+                    <AppLayout>
+                      <MyBookingsPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/turfs"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "customer", "vendor"]}>
-                  <AppLayout>
-                    <TurfsPage />
-                  </AppLayout>
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Router>
+              <Route
+                path="/turfs"
+                element={
+                  <ProtectedRoute
+                    requiredRoles={["admin", "customer", "vendor"]}
+                  >
+                    <AppLayout>
+                      <TurfsPage />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </Router>
         </AuthInitializer>
       </PersistGate>
     </Provider>

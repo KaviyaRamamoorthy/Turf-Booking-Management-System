@@ -1,7 +1,7 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
-import type { RootState, UserRole } from '../../types';
+import React from "react";
+import { useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
+import type { RootState, UserRole } from "../../types";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -26,24 +26,41 @@ const Unauthorized: React.FC = () => (
   </div>
 );
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  requiredRoles, 
-  fallback: FallbackComponent = Unauthorized 
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requiredRoles,
+  fallback: FallbackComponent = Unauthorized,
 }) => {
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { user, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
+
+  // Debug logging to understand the issue
+  console.log("ProtectedRoute Debug:", {
+    isAuthenticated,
+    user,
+    userRole: user?.role,
+    requiredRoles,
+    roleIncluded: user?.role ? requiredRoles.includes(user.role as any) : false,
+  });
 
   // Check if user is authenticated
   if (!isAuthenticated || !user) {
+    console.log("User not authenticated, redirecting to login");
     return <Navigate to="/auth/login" replace />;
   }
 
   // Check if user has required role
-  if (!requiredRoles.includes(user.role)) {
+  if (!user.role || !requiredRoles.includes(user.role as any)) {
+    console.log("Access denied - role check failed:", {
+      userRole: user.role,
+      requiredRoles,
+    });
     return <FallbackComponent />;
   }
 
+  console.log("Access granted");
   return <>{children}</>;
 };
 
-export default ProtectedRoute; 
+export default ProtectedRoute;

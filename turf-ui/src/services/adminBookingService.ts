@@ -1,7 +1,5 @@
 import type { ApiResponse } from "../types";
-
-// Base API URL
-const API_BASE_URL = "/api/v1";
+import { apiGet, apiPut } from "../utils/apiInterceptor";
 
 // Admin Booking interfaces
 export interface AdminBookingResponse {
@@ -52,6 +50,14 @@ export interface AdminBookingFilters {
   limit?: number;
 }
 
+export interface StatusCounts {
+  pending: number;
+  confirmed: number;
+  cancelled: number;
+  completed: number;
+  total: number;
+}
+
 class AdminBookingService {
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem("authToken");
@@ -66,232 +72,76 @@ class AdminBookingService {
     filters?: AdminBookingFilters
   ): Promise<ApiResponse<AdminBookingListResponse>> {
     try {
+      console.log("Fetching all bookings (admin) with filters:", filters);
+
+      // Build query parameters for the real API
       const queryParams = new URLSearchParams();
-      if (filters?.turfId) queryParams.append("turfId", filters.turfId);
-      if (filters?.bookingDate) queryParams.append("bookingDate", filters.bookingDate);
       if (filters?.status) queryParams.append("status", filters.status);
+      if (filters?.bookingDate) {
+        // For single date filter, use both startDate and endDate as the same date
+        queryParams.append("startDate", filters.bookingDate);
+        queryParams.append("endDate", filters.bookingDate);
+      }
       if (filters?.page) queryParams.append("page", filters.page.toString());
-      if (filters?.limit) queryParams.append("limit", filters.limit.toString());
+      if (filters?.limit) queryParams.append("size", filters.limit.toString());
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const queryString = queryParams.toString();
+      const url = queryString ? `/bookings/admin/all?${queryString}` : "/bookings/admin/all";
 
-      // Sample response based on api-implementation.md
-      const sampleResponse: ApiResponse<AdminBookingListResponse> = {
+      // Call the real backend API
+      const response = await apiGet<ApiResponse<any[]>>(url);
+
+      if (!response.success) {
+        throw new Error(response.message || "Failed to fetch bookings");
+      }
+
+      // Transform backend response to match admin interface
+      const transformedBookings: AdminBookingResponse[] = (response.data || []).map((booking: any) => ({
+        id: booking.id,
+        turfId: booking.turfId,
+        customerId: booking.customerId,
+        bookingDate: booking.bookingDate,
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        totalAmount: booking.totalAmount || 0,
+        status: booking.status,
+        turf: {
+          id: booking.turfId,
+          name: booking.turfName || "Turf Name",
+          category: booking.categoryName || "football",
+          location: {
+            address: booking.turfLocation || "Address",
+            city: "City",
+            state: "State",
+            zipCode: "000000",
+          },
+        },
+        customer: {
+          id: booking.customerId,
+          firstName: booking.customerName?.split(' ')[0] || "Customer",
+          lastName: booking.customerName?.split(' ').slice(1).join(' ') || "Name",
+          email: booking.customerEmail || "customer@example.com",
+          phone: "+91 0000000000",
+        },
+        bookingReference: `TBA${booking.id?.slice(0, 6) || '000000'}`,
+        createdAt: booking.createdAt || new Date().toISOString(),
+        updatedAt: booking.updatedAt || new Date().toISOString(),
+      }));
+
+      const adminResponse: ApiResponse<AdminBookingListResponse> = {
         success: true,
         message: "Bookings retrieved successfully",
         data: {
-          bookings: [
-            {
-              id: "booking_001",
-              turfId: "turf_001",
-              customerId: "user_123",
-              bookingDate: "2024-01-25",
-              startTime: "18:00",
-              endTime: "19:00",
-              totalAmount: 1500,
-              status: "pending",
-              turf: {
-                id: "turf_001",
-                name: "Elite Football Arena",
-                category: "football",
-                location: {
-                  address: "123 Sports Complex, Koramangala 4th Block",
-                  city: "Bangalore",
-                  state: "Karnataka",
-                  zipCode: "560034",
-                },
-              },
-              customer: {
-                id: "user_123",
-                firstName: "Rajesh",
-                lastName: "Kumar",
-                email: "rajesh.kumar@example.com",
-                phone: "+91 9876543210",
-              },
-              bookingReference: "TBA001250124001",
-              createdAt: "2024-01-20T10:30:00Z",
-              updatedAt: "2024-01-20T10:30:00Z",
-            },
-            {
-              id: "booking_002",
-              turfId: "turf_002",
-              customerId: "user_124",
-              bookingDate: "2024-01-25",
-              startTime: "19:00",
-              endTime: "20:00",
-              totalAmount: 1200,
-              status: "pending",
-              turf: {
-                id: "turf_002",
-                name: "Green Valley Football Club",
-                category: "football",
-                location: {
-                  address: "456 Garden Road, Whitefield",
-                  city: "Bangalore",
-                  state: "Karnataka",
-                  zipCode: "560066",
-                },
-              },
-              customer: {
-                id: "user_124",
-                firstName: "Priya",
-                lastName: "Sharma",
-                email: "priya.sharma@example.com",
-                phone: "+91 9876543211",
-              },
-              bookingReference: "TBA002250124002",
-              createdAt: "2024-01-21T14:15:00Z",
-              updatedAt: "2024-01-21T14:15:00Z",
-            },
-            {
-              id: "booking_003",
-              turfId: "turf_003",
-              customerId: "user_125",
-              bookingDate: "2024-01-26",
-              startTime: "16:00",
-              endTime: "19:00",
-              totalAmount: 6000,
-              status: "pending",
-              turf: {
-                id: "turf_003",
-                name: "Champions Cricket Ground",
-                category: "cricket",
-                location: {
-                  address: "789 Stadium Road, Indiranagar",
-                  city: "Bangalore",
-                  state: "Karnataka",
-                  zipCode: "560038",
-                },
-              },
-              customer: {
-                id: "user_125",
-                firstName: "Amit",
-                lastName: "Patel",
-                email: "amit.patel@example.com",
-                phone: "+91 9876543212",
-              },
-              bookingReference: "TBA003260124003",
-              createdAt: "2024-01-22T09:45:00Z",
-              updatedAt: "2024-01-22T09:45:00Z",
-            },
-            {
-              id: "booking_004",
-              turfId: "turf_001",
-              customerId: "user_126",
-              bookingDate: "2024-01-24",
-              startTime: "20:00",
-              endTime: "21:00",
-              totalAmount: 1500,
-              status: "pending",
-              turf: {
-                id: "turf_001",
-                name: "Elite Football Arena",
-                category: "football",
-                location: {
-                  address: "123 Sports Complex, Koramangala 4th Block",
-                  city: "Bangalore",
-                  state: "Karnataka",
-                  zipCode: "560034",
-                },
-              },
-              customer: {
-                id: "user_126",
-                firstName: "Sneha",
-                lastName: "Reddy",
-                email: "sneha.reddy@example.com",
-                phone: "+91 9876543213",
-              },
-              bookingReference: "TBA004240124004",
-              createdAt: "2024-01-19T16:20:00Z",
-              updatedAt: "2024-01-24T21:00:00Z",
-            },
-            {
-              id: "booking_005",
-              turfId: "turf_002",
-              customerId: "user_127",
-              bookingDate: "2024-01-23",
-              startTime: "17:00",
-              endTime: "18:00",
-              totalAmount: 1200,
-              status: "cancelled",
-              turf: {
-                id: "turf_002",
-                name: "Green Valley Football Club",
-                category: "football",
-                location: {
-                  address: "456 Garden Road, Whitefield",
-                  city: "Bangalore",
-                  state: "Karnataka",
-                  zipCode: "560066",
-                },
-              },
-              customer: {
-                id: "user_127",
-                firstName: "Vikram",
-                lastName: "Singh",
-                email: "vikram.singh@example.com",
-                phone: "+91 9876543214",
-              },
-              bookingReference: "TBA005230124005",
-              createdAt: "2024-01-18T11:30:00Z",
-              updatedAt: "2024-01-22T15:45:00Z",
-            },
-            {
-              id: "booking_006",
-              turfId: "turf_003",
-              customerId: "user_128",
-              bookingDate: "2024-01-27",
-              startTime: "14:00",
-              endTime: "15:00",
-              totalAmount: 2000,
-              status: "pending",
-              turf: {
-                id: "turf_003",
-                name: "Champions Cricket Ground",
-                category: "cricket",
-                location: {
-                  address: "789 Stadium Road, Indiranagar",
-                  city: "Bangalore",
-                  state: "Karnataka",
-                  zipCode: "560038",
-                },
-              },
-              customer: {
-                id: "user_128",
-                firstName: "Meera",
-                lastName: "Joshi",
-                email: "meera.joshi@example.com",
-                phone: "+91 9876543215",
-              },
-              bookingReference: "TBA006270124006",
-              createdAt: "2024-01-23T12:00:00Z",
-              updatedAt: "2024-01-23T12:00:00Z",
-            },
-          ],
-          total: 6,
-          page: 1,
-          limit: 20,
-          totalPages: 1,
+          bookings: transformedBookings,
+          total: transformedBookings.length,
+          page: filters?.page || 1,
+          limit: filters?.limit || 20,
+          totalPages: Math.ceil(transformedBookings.length / (filters?.limit || 20)),
         },
       };
 
-      return sampleResponse;
-
-      /* 
-      // Actual API call (uncomment when backend is ready)
-      const response = await fetch(`${API_BASE_URL}/bookings?${queryParams}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result: ApiResponse<AdminBookingListResponse> = await response.json();
-      return result;
-      */
+      console.log("📊 Admin bookings fetched:", transformedBookings.length);
+      return adminResponse;
     } catch (error) {
       console.error("Get all bookings error:", error);
       return {
@@ -307,62 +157,53 @@ class AdminBookingService {
     bookingId: string
   ): Promise<ApiResponse<AdminBookingResponse>> {
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      console.log("Fetching booking details for ID:", bookingId);
 
-      // Sample response
-      const sampleResponse: ApiResponse<AdminBookingResponse> = {
-        success: true,
-        message: "Booking details retrieved successfully",
-        data: {
-          id: bookingId,
-          turfId: "turf_001",
-          customerId: "user_123",
-          bookingDate: "2024-01-25",
-          startTime: "18:00",
-          endTime: "19:00",
-          totalAmount: 1500,
-          status: "pending", // Changed to pending by default
-          turf: {
-            id: "turf_001",
-            name: "Elite Football Arena",
-            category: "football",
-            location: {
-              address: "123 Sports Complex, Koramangala 4th Block",
-              city: "Bangalore",
-              state: "Karnataka",
-              zipCode: "560034",
-            },
-          },
-          customer: {
-            id: "user_123",
-            firstName: "Rajesh",
-            lastName: "Kumar",
-            email: "rajesh.kumar@example.com",
-            phone: "+91 9876543210",
-          },
-          bookingReference: "TBA001250124001",
-          createdAt: "2024-01-20T10:30:00Z",
-          updatedAt: "2024-01-20T10:30:00Z",
-        },
-      };
+      // Call the real backend API
+      const response = await apiGet<ApiResponse<any>>(`/bookings/${bookingId}`);
 
-      return sampleResponse;
-
-      /* 
-      // Actual API call (uncomment when backend is ready)
-      const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.success) {
+        throw new Error(response.message || "Failed to fetch booking details");
       }
 
-      const result: ApiResponse<AdminBookingResponse> = await response.json();
-      return result;
-      */
+      // Transform the response to match admin interface
+      const transformedBooking: AdminBookingResponse = {
+        id: response.data.id,
+        turfId: response.data.turfId,
+        customerId: response.data.customerId,
+        bookingDate: response.data.bookingDate,
+        startTime: response.data.startTime,
+        endTime: response.data.endTime,
+        totalAmount: response.data.totalAmount || 0,
+        status: response.data.status,
+        turf: {
+          id: response.data.turfId,
+          name: response.data.turfName || "Turf Name",
+          category: response.data.categoryName || "football",
+          location: {
+            address: response.data.turfLocation || "Address",
+            city: "City",
+            state: "State",
+            zipCode: "000000",
+          },
+        },
+        customer: {
+          id: response.data.customerId,
+          firstName: response.data.customerName?.split(' ')[0] || "Customer",
+          lastName: response.data.customerName?.split(' ')[1] || "Name",
+          email: response.data.customerEmail || "customer@example.com",
+          phone: "+91 0000000000",
+        },
+        bookingReference: `TBA${response.data.id?.slice(0, 6) || '000000'}`,
+        createdAt: response.data.createdAt || new Date().toISOString(),
+        updatedAt: response.data.updatedAt || new Date().toISOString(),
+      };
+
+      return {
+        success: true,
+        message: "Booking details retrieved successfully",
+        data: transformedBooking,
+      };
     } catch (error) {
       console.error("Get booking details error:", error);
       return {
@@ -378,62 +219,55 @@ class AdminBookingService {
     bookingId: string
   ): Promise<ApiResponse<AdminBookingResponse>> {
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      console.log("Confirming booking:", bookingId);
 
-      // Sample response
-      const sampleResponse: ApiResponse<AdminBookingResponse> = {
-        success: true,
-        message: "Booking confirmed successfully",
-        data: {
-          id: bookingId,
-          turfId: "turf_001",
-          customerId: "user_123",
-          bookingDate: "2024-01-25",
-          startTime: "18:00",
-          endTime: "19:00",
-          totalAmount: 1500,
-          status: "confirmed",
-          turf: {
-            id: "turf_001",
-            name: "Elite Football Arena",
-            category: "football",
-            location: {
-              address: "123 Sports Complex, Koramangala 4th Block",
-              city: "Bangalore",
-              state: "Karnataka",
-              zipCode: "560034",
-            },
-          },
-          customer: {
-            id: "user_123",
-            firstName: "Rajesh",
-            lastName: "Kumar",
-            email: "rajesh.kumar@example.com",
-            phone: "+91 9876543210",
-          },
-          bookingReference: "TBA001250124001",
-          createdAt: "2024-01-20T10:30:00Z",
-          updatedAt: new Date().toISOString(),
-        },
-      };
+      // Call the real backend API to update booking status
+      const response = await apiPut<ApiResponse<any>>(
+        `/bookings/${bookingId}/status?status=CONFIRMED`
+      );
 
-      return sampleResponse;
-
-      /* 
-      // Actual API call (uncomment when backend is ready)
-      const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/confirm`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.success) {
+        throw new Error(response.message || "Failed to confirm booking");
       }
 
-      const result: ApiResponse<AdminBookingResponse> = await response.json();
-      return result;
-      */
+      // Transform the response to match admin interface
+      const transformedBooking: AdminBookingResponse = {
+        id: response.data.id,
+        turfId: response.data.turfId,
+        customerId: response.data.customerId,
+        bookingDate: response.data.bookingDate,
+        startTime: response.data.startTime,
+        endTime: response.data.endTime,
+        totalAmount: response.data.totalAmount || 0,
+        status: "confirmed",
+        turf: {
+          id: response.data.turfId,
+          name: response.data.turfName || "Turf Name",
+          category: response.data.categoryName || "football",
+          location: {
+            address: response.data.turfLocation || "Address",
+            city: "City",
+            state: "State",
+            zipCode: "000000",
+          },
+        },
+        customer: {
+          id: response.data.customerId,
+          firstName: response.data.customerName?.split(' ')[0] || "Customer",
+          lastName: response.data.customerName?.split(' ')[1] || "Name",
+          email: response.data.customerEmail || "customer@example.com",
+          phone: "+91 0000000000",
+        },
+        bookingReference: `TBA${response.data.id?.slice(0, 6) || '000000'}`,
+        createdAt: response.data.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      return {
+        success: true,
+        message: "Booking confirmed successfully",
+        data: transformedBooking,
+      };
     } catch (error) {
       console.error("Confirm booking error:", error);
       return {
@@ -450,63 +284,55 @@ class AdminBookingService {
     reason?: string
   ): Promise<ApiResponse<AdminBookingResponse>> {
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      console.log("Rejecting booking:", bookingId, "Reason:", reason);
 
-      // Sample response
-      const sampleResponse: ApiResponse<AdminBookingResponse> = {
-        success: true,
-        message: "Booking rejected successfully",
-        data: {
-          id: bookingId,
-          turfId: "turf_001",
-          customerId: "user_123",
-          bookingDate: "2024-01-25",
-          startTime: "18:00",
-          endTime: "19:00",
-          totalAmount: 1500,
-          status: "cancelled",
-          turf: {
-            id: "turf_001",
-            name: "Elite Football Arena",
-            category: "football",
-            location: {
-              address: "123 Sports Complex, Koramangala 4th Block",
-              city: "Bangalore",
-              state: "Karnataka",
-              zipCode: "560034",
-            },
-          },
-          customer: {
-            id: "user_123",
-            firstName: "Rajesh",
-            lastName: "Kumar",
-            email: "rajesh.kumar@example.com",
-            phone: "+91 9876543210",
-          },
-          bookingReference: "TBA001250124001",
-          createdAt: "2024-01-20T10:30:00Z",
-          updatedAt: new Date().toISOString(),
-        },
-      };
+      // Call the real backend API to update booking status to cancelled
+      const response = await apiPut<ApiResponse<any>>(
+        `/bookings/${bookingId}/status?status=CANCELLED`
+      );
 
-      return sampleResponse;
-
-      /* 
-      // Actual API call (uncomment when backend is ready)
-      const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/reject`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ reason }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.success) {
+        throw new Error(response.message || "Failed to reject booking");
       }
 
-      const result: ApiResponse<AdminBookingResponse> = await response.json();
-      return result;
-      */
+      // Transform the response to match admin interface
+      const transformedBooking: AdminBookingResponse = {
+        id: response.data.id,
+        turfId: response.data.turfId,
+        customerId: response.data.customerId,
+        bookingDate: response.data.bookingDate,
+        startTime: response.data.startTime,
+        endTime: response.data.endTime,
+        totalAmount: response.data.totalAmount || 0,
+        status: "cancelled",
+        turf: {
+          id: response.data.turfId,
+          name: response.data.turfName || "Turf Name",
+          category: response.data.categoryName || "football",
+          location: {
+            address: response.data.turfLocation || "Address",
+            city: "City",
+            state: "State",
+            zipCode: "000000",
+          },
+        },
+        customer: {
+          id: response.data.customerId,
+          firstName: response.data.customerName?.split(' ')[0] || "Customer",
+          lastName: response.data.customerName?.split(' ')[1] || "Name",
+          email: response.data.customerEmail || "customer@example.com",
+          phone: "+91 0000000000",
+        },
+        bookingReference: `TBA${response.data.id?.slice(0, 6) || '000000'}`,
+        createdAt: response.data.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      return {
+        success: true,
+        message: "Booking rejected successfully",
+        data: transformedBooking,
+      };
     } catch (error) {
       console.error("Reject booking error:", error);
       return {
@@ -514,6 +340,102 @@ class AdminBookingService {
         message: "Failed to reject booking. Please try again.",
         error: error instanceof Error ? error.message : "Unknown error",
       } as ApiResponse<AdminBookingResponse>;
+    }
+  }
+
+  // Complete booking
+  async completeBooking(
+    bookingId: string
+  ): Promise<ApiResponse<AdminBookingResponse>> {
+    try {
+      console.log("Completing booking:", bookingId);
+
+      // Call the real backend API to complete booking
+      const response = await apiPut<ApiResponse<any>>(
+        `/bookings/${bookingId}/complete`
+      );
+
+      if (!response.success) {
+        throw new Error(response.message || "Failed to complete booking");
+      }
+
+      // Transform the response to match admin interface
+      const transformedBooking: AdminBookingResponse = {
+        id: response.data.id,
+        turfId: response.data.turfId,
+        customerId: response.data.customerId,
+        bookingDate: response.data.bookingDate,
+        startTime: response.data.startTime,
+        endTime: response.data.endTime,
+        totalAmount: response.data.totalAmount || 0,
+        status: "completed",
+        turf: {
+          id: response.data.turfId,
+          name: response.data.turfName || "Turf Name",
+          category: response.data.categoryName || "football",
+          location: {
+            address: response.data.turfLocation || "Address",
+            city: "City",
+            state: "State",
+            zipCode: "000000",
+          },
+        },
+        customer: {
+          id: response.data.customerId,
+          firstName: response.data.customerName?.split(' ')[0] || "Customer",
+          lastName: response.data.customerName?.split(' ')[1] || "Name",
+          email: response.data.customerEmail || "customer@example.com",
+          phone: "+91 0000000000",
+        },
+        bookingReference: `TBA${response.data.id?.slice(0, 6) || '000000'}`,
+        createdAt: response.data.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      return {
+        success: true,
+        message: "Booking completed successfully",
+        data: transformedBooking,
+      };
+    } catch (error) {
+      console.error("Complete booking error:", error);
+      return {
+        success: false,
+        message: "Failed to complete booking. Please try again.",
+        error: error instanceof Error ? error.message : "Unknown error",
+      } as ApiResponse<AdminBookingResponse>;
+    }
+  }
+
+  async getStatusCounts(): Promise<ApiResponse<StatusCounts>> {
+    try {
+      const response = await fetch(`/api/bookings/status-counts`, {
+        method: "GET",
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const apiResponse = await response.json();
+      
+      if (!apiResponse.success) {
+        throw new Error(apiResponse.message || "Failed to get status counts");
+      }
+
+      return {
+        success: true,
+        message: "Status counts retrieved successfully",
+        data: apiResponse.data,
+      };
+    } catch (error) {
+      console.error("Get status counts error:", error);
+      return {
+        success: false,
+        message: "Failed to get status counts. Please try again.",
+        error: error instanceof Error ? error.message : "Unknown error",
+      } as ApiResponse<StatusCounts>;
     }
   }
 }

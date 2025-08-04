@@ -7,7 +7,7 @@ import java.util.UUID;
 /**
  * Repository for Category entity.
  *
- * @author Saravanamuthukumar S
+ * @author Kaviya Ramamoorthy
  */
 public interface CategoryRepository extends JpaRepository<Category, UUID> {
 } 

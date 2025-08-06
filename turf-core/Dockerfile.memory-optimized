@@ -1,0 +1,55 @@
+# Multi-stage build with memory optimizations for Render.com
+FROM maven:3.8-openjdk-17-slim as build
+
+# Set working directory
+WORKDIR /app
+
+# Copy pom.xml first for better Docker layer caching
+COPY pom.xml .
+
+# Download dependencies (this layer will be cached if pom.xml doesn't change)
+RUN mvn dependency:go-offline -B
+
+# Copy source code
+COPY src ./src
+
+# Build the application with memory optimizations
+RUN mvn clean package -DskipTests -Dmaven.javadoc.skip=true -Dmaven.source.skip=true
+
+# Runtime stage - use Eclipse Temurin for better memory efficiency
+FROM eclipse-temurin:17-jre-alpine
+
+# Install necessary packages
+RUN apk add --no-cache curl
+
+# Set working directory
+WORKDIR /app
+
+# Create a non-root user for security
+RUN addgroup -g 1001 -S spring && \
+    adduser -S spring -u 1001 -G spring
+
+# Copy the jar file from build stage
+COPY --from=build /app/target/turf-booking-*.jar app.jar
+
+# Change ownership of the app directory
+RUN chown -R spring:spring /app
+
+# Switch to non-root user
+USER spring
+
+# Expose the port the app runs on
+EXPOSE 8080
+
+# Health check with longer intervals to reduce overhead
+HEALTHCHECK --interval=60s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# Conservative memory optimization for 512MB constraint
+ENV JAVA_OPTS="-Xmx280m -Xms64m -XX:+UseSerialGC -XX:+UseContainerSupport -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false"
+
+# Set production profile
+ENV SPRING_PROFILES_ACTIVE=prod
+
+# Run the application
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=prod -jar app.jar"]

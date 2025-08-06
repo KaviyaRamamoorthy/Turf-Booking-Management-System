@@ -1,0 +1,57 @@
+# Alternative Dockerfile using Amazon Corretto
+FROM maven:3.8-openjdk-17-slim as build
+
+# Set working directory
+WORKDIR /app
+
+# Copy pom.xml first for better Docker layer caching
+COPY pom.xml .
+
+# Download dependencies (this layer will be cached if pom.xml doesn't change)
+RUN mvn dependency:go-offline -B
+
+# Copy source code
+COPY src ./src
+
+# Build the application
+RUN mvn clean package -DskipTests
+
+# Runtime stage - use Amazon Corretto JRE
+FROM amazoncorretto:17
+
+# Set working directory
+WORKDIR /app
+
+# Install curl for health checks
+RUN yum update -y && \
+    yum install -y curl && \
+    yum clean all && \
+    rm -rf /var/cache/yum
+
+# Create a non-root user for security
+RUN groupadd -r spring && useradd -r -g spring spring
+
+# Copy the jar file from build stage
+COPY --from=build /app/target/turf-booking-*.jar app.jar
+
+# Change ownership of the app directory
+RUN chown -R spring:spring /app
+
+# Switch to non-root user
+USER spring
+
+# Expose the port the app runs on
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=60s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# Memory-optimized JVM settings for 512MB environment
+ENV JAVA_OPTS="-Xmx320m -Xms64m -XX:+UseSerialGC -XX:MaxRAMPercentage=60 -XX:+UseContainerSupport -XX:MaxMetaspaceSize=64m -XX:CompressedClassSpaceSize=32m -Djava.security.egd=file:/dev/./urandom -Dspring.jmx.enabled=false"
+
+# Set production profile
+ENV SPRING_PROFILES_ACTIVE=prod
+
+# Run the application
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=prod -jar app.jar"]

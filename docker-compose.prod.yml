@@ -1,0 +1,83 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database for Production
+  postgres:
+    image: postgres:15-alpine
+    container_name: turf-postgres-prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-turf_booking}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./turf-core/database-setup.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - turf-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Spring Boot Backend for Production
+  backend:
+    build:
+      context: ./turf-core
+      dockerfile: Dockerfile
+    container_name: turf-backend-prod
+    environment:
+      SPRING_PROFILES_ACTIVE: docker,prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-turf_booking}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+
+      # Admin Configuration
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@turf.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+
+      # Mail Configuration
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+
+      # CORS Configuration
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://your-frontend-domain.com}
+
+      # JVM Options for Production
+      JAVA_OPTS: -Xmx1g -Xms512m -XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=80.0
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - turf-network
+    volumes:
+      - ./turf-core/logs:/app/logs
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test:
+        ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+        reservations:
+          memory: 512M
+
+volumes:
+  postgres_prod_data:
+    driver: local
+
+networks:
+  turf-network:
+    driver: bridge

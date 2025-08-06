@@ -1,0 +1,21 @@
+package com.turf.service;
+
+import com.turf.dto.UserDto;
+import java.util.UUID;
+import java.util.List;
+
+/**
+ * Service interface for user-related operations.
+ *
+ * @author Kaviya Ramamoorthy
+ */
+public interface UserService {
+    UserDto getUserById(UUID id);
+    UserDto getUserByEmail(String email);
+    String getUserRoleByEmail(String email);
+    List<UserDto> getAllUsers();
+    UserDto createUser(UserDto userDto);
+    UserDto updateUser(UUID id, UserDto userDto);
+    void deleteUser(UUID id);
+    boolean isUserVerified(String email);
+} 
